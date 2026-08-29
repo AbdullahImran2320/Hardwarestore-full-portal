@@ -1,0 +1,40 @@
+.danger-text { color: var(--color-danger); font-weight: 600; }
+
+.filter-bar { padding: var(--space-sm); margin-bottom: var(--space-md); }
+.search-input { width: 100%; }
+
+.customer-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: var(--space-md);
+}
+
+.customer-card {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+  transition: transform 0.1s ease, box-shadow 0.15s ease;
+  &:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+}
+
+.customer-card-top { display: flex; align-items: center; gap: var(--space-sm); margin-bottom: var(--space-sm); }
+.avatar-sm {
+  width: 40px; height: 40px; border-radius: 50%;
+  background: var(--color-primary); color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700; flex-shrink: 0;
+}
+.customer-name { font-weight: 600; }
+.customer-phone { font-size: 0.8rem; color: var(--color-text-muted); }
+
+.customer-card-bottom { display: flex; justify-content: space-between; align-items: center; }
+.bill-count { font-size: 0.8rem; color: var(--color-text-muted); }
+
+.form-grid-single { display: flex; flex-direction: column; gap: var(--space-md); margin: var(--space-md) 0; }
+.field { display: flex; flex-direction: column; gap: 0.3rem; span { font-size: 0.8rem; font-weight: 600; color: var(--color-text-muted); } }
+.modal-actions { display: flex; justify-content: flex-end; gap: var(--space-sm); margin-top: var(--space-md); }
+.form-error { background: #fce8e8; color: var(--color-danger); padding: var(--space-sm); border-radius: var(--radius-sm); font-size: 0.85rem; margin-bottom: var(--space-sm); }
+
+.skeleton-block { height: 200px; background: linear-gradient(90deg, var(--color-surface-alt) 25%, #e8e3db 50%, var(--color-surface-alt) 75%); background-size: 200% 100%; animation: shimmer 1.4s infinite; }
+.empty-state-block { text-align: center; padding: var(--space-xl); color: var(--color-text-muted); }
+.error-card { text-align: center; color: var(--color-danger); p { margin-bottom: var(--space-md); } }

@@ -1,0 +1,193 @@
+<div class="page">
+  <div class="page-header">
+    <div>
+      <h1>All Bills</h1>
+      <p class="page-sub">
+        {{ totals().count }} bills · Rs. {{ totals().totalAmount | number:'1.0-0' }} total ·
+        <span class="danger-text">Rs. {{ totals().totalOutstanding | number:'1.0-0' }} outstanding</span>
+      </p>
+    </div>
+    <a routerLink="/billing" class="btn btn-primary">+ New Bill</a>
+  </div>
+
+  <div class="filter-bar card">
+    <input
+      type="text"
+      class="input search-input"
+      placeholder="Search by bill # or customer..."
+      [ngModel]="searchTerm()"
+      (ngModelChange)="searchTerm.set($event)" />
+
+    <div class="status-tabs">
+      @for (s of ['All', 'Unpaid', 'Partial', 'Paid']; track s) {
+        <button
+          class="status-tab"
+          [class.active]="statusFilter() === s"
+          (click)="statusFilter.set($any(s))">
+          {{ s }}
+        </button>
+      }
+    </div>
+  </div>
+
+  @if (isLoading()) {
+    <div class="card skeleton-block"></div>
+  } @else if (errorMsg()) {
+    <div class="card error-card">
+      <p>{{ errorMsg() }}</p>
+      <button class="btn btn-secondary" (click)="loadBills()">Retry</button>
+    </div>
+  } @else if (filteredBills().length === 0) {
+    <div class="card empty-state-block">
+      <p>{{ bills().length === 0 ? 'No bills created yet.' : 'No bills match your filters.' }}</p>
+    </div>
+  } @else {
+    <!-- Desktop table -->
+    <div class="card table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr><th>Bill #</th><th>Date</th><th>Customer</th><th>Total</th><th>Paid</th><th>Outstanding</th><th>Status</th><th>Method</th><th></th></tr>
+        </thead>
+        <tbody>
+          @for (b of filteredBills(); track b.id) {
+            <tr class="clickable-row" (click)="viewDetail(b)">
+              <td class="mono">#{{ b.id }}</td>
+              <td>{{ b.billDate | date:'mediumDate' }}</td>
+              <td>{{ b.customerName || 'Walk-in' }}</td>
+              <td>Rs. {{ b.totalAmount | number:'1.0-0' }}</td>
+              <td>Rs. {{ b.paidAmount | number:'1.0-0' }}</td>
+              <td>Rs. {{ b.outstandingAmount | number:'1.0-0' }}</td>
+              <td>
+                <span class="badge"
+                  [class.badge-success]="b.status === 'Paid'"
+                  [class.badge-warning]="b.status === 'Partial'"
+                  [class.badge-danger]="b.status === 'Unpaid'">
+                  {{ b.status }}
+                </span>
+              </td>
+              <td>{{ b.paymentMethod }}</td>
+              <td class="row-actions">
+                @if (b.status !== 'Paid') {
+                  <button class="btn btn-secondary btn-sm" (click)="openPayModal(b, $event)">Pay</button>
+                }
+                <button class="icon-btn-sm danger" (click)="deleteBill(b, $event)" title="Delete Bill">🗑️</button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Mobile cards -->
+    <div class="mobile-cards">
+      @for (b of filteredBills(); track b.id) {
+        <div class="card bill-card" (click)="viewDetail(b)">
+          <div class="bill-card-top">
+            <div>
+              <div class="mono bold">#{{ b.id }}</div>
+              <div class="bill-card-sub">{{ b.customerName || 'Walk-in' }} · {{ b.billDate | date:'mediumDate' }} · {{ b.paymentMethod }}</div>
+            </div>
+            <span class="badge"
+              [class.badge-success]="b.status === 'Paid'"
+              [class.badge-warning]="b.status === 'Partial'"
+              [class.badge-danger]="b.status === 'Unpaid'">
+              {{ b.status }}
+            </span>
+          </div>
+          <div class="bill-card-bottom">
+            <span>Total: Rs. {{ b.totalAmount | number:'1.0-0' }}</span>
+            <div class="row-actions">
+              @if (b.status !== 'Paid') {
+                <button class="btn btn-secondary btn-sm" (click)="openPayModal(b, $event)">Pay</button>
+              }
+              <button class="icon-btn-sm danger" (click)="deleteBill(b, $event)" title="Delete Bill">🗑️</button>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>
+
+<!-- Bill detail modal -->
+@if (detailBill(); as bill) {
+  <div class="modal-backdrop" (click)="closeDetail()">
+    <div class="modal card" (click)="$event.stopPropagation()">
+      <h3>Bill #{{ bill.id }}</h3>
+      <p class="modal-sub">{{ bill.customerName || 'Walk-in Customer' }} · {{ bill.billDate | date:'medium' }} · {{ bill.paymentMethod }}</p>
+
+      <table class="data-table">
+        <thead><tr><th>Item</th><th>Qty</th><th>Price</th><th>Total</th></tr></thead>
+        <tbody>
+          @for (item of bill.items; track item.productId) {
+            <tr>
+              <td>{{ item.productName }}</td>
+              <td>{{ item.quantity }}</td>
+              <td>Rs. {{ item.unitPrice | number:'1.0-0' }}</td>
+              <td>Rs. {{ item.lineTotal | number:'1.0-0' }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+
+      <div class="detail-totals">
+        <div><span>Total</span><span>Rs. {{ bill.totalAmount | number:'1.0-0' }}</span></div>
+        <div><span>Paid</span><span>Rs. {{ bill.paidAmount | number:'1.0-0' }}</span></div>
+        <div class="outstanding"><span>Outstanding</span><span>Rs. {{ bill.outstandingAmount | number:'1.0-0' }}</span></div>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn btn-secondary" (click)="closeDetail()">Close</button>
+        <button class="btn btn-secondary danger" (click)="deleteBill(bill)">Delete Bill</button>
+        @if (bill.status !== 'Paid') {
+          <button class="btn btn-primary" (click)="openPayModal(bill)">Record Payment</button>
+        }
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Payment modal -->
+@if (payModalBill(); as bill) {
+  <div class="modal-backdrop" (click)="closePayModal()">
+    <div class="modal card" (click)="$event.stopPropagation()">
+      <h3>Record Payment — Bill #{{ bill.id }}</h3>
+      <p class="modal-sub">Outstanding: Rs. {{ bill.outstandingAmount | number:'1.0-0' }}</p>
+
+      @if (payError()) { <div class="form-error">{{ payError() }}</div> }
+
+      <div class="form-grid-single">
+        <label class="field">
+          <span>Amount</span>
+          <input type="number" class="input" min="0" [max]="bill.outstandingAmount"
+            [ngModel]="paymentAmount()" (ngModelChange)="paymentAmount.set($event)" />
+        </label>
+        <label class="field">
+          <span>Note (optional)</span>
+          <input type="text" class="input" placeholder="e.g. Cash payment"
+            [ngModel]="paymentNote()" (ngModelChange)="paymentNote.set($event)" />
+        </label>
+        <label class="field">
+          <span>Payment Method</span>
+          <div class="payment-method-toggle">
+            <button type="button" class="btn btn-sm"
+              [class.btn-primary]="paymentMethod() === 'Cash'"
+              [class.btn-secondary]="paymentMethod() !== 'Cash'"
+              (click)="paymentMethod.set('Cash')">💵 Cash</button>
+            <button type="button" class="btn btn-sm"
+              [class.btn-primary]="paymentMethod() === 'Online'"
+              [class.btn-secondary]="paymentMethod() !== 'Online'"
+              (click)="paymentMethod.set('Online')">🏦 Online</button>
+          </div>
+        </label>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn btn-secondary" (click)="closePayModal()" [disabled]="isPaying()">Cancel</button>
+        <button class="btn btn-primary" (click)="submitPayment()" [disabled]="isPaying()">
+          {{ isPaying() ? 'Saving...' : 'Record Payment' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}

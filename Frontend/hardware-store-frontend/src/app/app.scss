@@ -1,0 +1,100 @@
+// ============ DESIGN TOKENS ============
+:root {
+  // Brand — a warm, industrial palette fits a hardware store better than generic SaaS blue
+  --color-primary: #d9480f;      // burnt orange — hardware/tools feel
+  --color-primary-dark: #b8380a;
+  --color-primary-light: #ff8c42;
+
+  --color-bg: #f7f5f2;           // warm off-white, not clinical white
+  --color-surface: #ffffff;
+  --color-surface-alt: #f0ede8;
+
+  --color-text: #2b2622;
+  --color-text-muted: #756e66;
+  --color-border: #e3ddd5;
+
+  --color-success: #2f9e44;
+  --color-warning: #e8a800;
+  --color-danger: #d63939;
+
+  // Spacing scale
+  --space-xs: 0.25rem;
+  --space-sm: 0.5rem;
+  --space-md: 1rem;
+  --space-lg: 1.5rem;
+  --space-xl: 2.5rem;
+
+  // Radius & shadow
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --shadow-sm: 0 1px 3px rgba(43, 38, 34, 0.08);
+  --shadow-md: 0 4px 12px rgba(43, 38, 34, 0.10);
+  --shadow-lg: 0 12px 32px rgba(43, 38, 34, 0.14);
+
+  // Typography
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  background: var(--color-bg);
+  color: var(--color-text);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4 { margin: 0 0 var(--space-sm) 0; font-weight: 600; letter-spacing: -0.02em; }
+
+// ============ RESPONSIVE BREAKPOINTS (mixins via SCSS) ============
+@mixin mobile { @media (max-width: 640px) { @content; } }
+@mixin tablet { @media (max-width: 1024px) { @content; } }
+
+// ============ REUSABLE UTILITY CLASSES ============
+.card {
+  background: var(--color-surface);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--color-border);
+  padding: var(--space-lg);
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: 0.6rem 1.2rem;
+  border-radius: var(--radius-sm);
+  border: none;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: transform 0.08s ease, box-shadow 0.15s ease;
+
+  &:active { transform: scale(0.97); }
+}
+
+.btn-primary {
+  background: var(--color-primary);
+  color: white;
+  &:hover { background: var(--color-primary-dark); box-shadow: var(--shadow-sm); }
+}
+
+.btn-secondary {
+  background: var(--color-surface-alt);
+  color: var(--color-text);
+  &:hover { background: var(--color-border); }
+}
+
+.badge {
+  display: inline-block;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+.badge-success { background: #e6f7e9; color: var(--color-success); }
+.badge-warning { background: #fff6e0; color: #a97a00; }
+.badge-danger  { background: #fce8e8; color: var(--color-danger); }

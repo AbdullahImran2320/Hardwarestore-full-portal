@@ -1,0 +1,233 @@
+<div class="page billing-page">
+  <div class="page-header">
+    <div>
+      <h1>New Bill</h1>
+      <p class="page-sub">Add products, set payment, and generate the bill</p>
+    </div>
+  </div>
+
+  <div class="billing-layout">
+    <!-- LEFT: Product picker -->
+    <div class="card product-picker">
+      <input
+        type="text"
+        class="input search-input"
+        placeholder="Search products to add..."
+        [ngModel]="searchTerm()"
+        (ngModelChange)="searchTerm.set($event)" />
+
+      @if (isLoadingProducts()) {
+        <div class="skeleton-block"></div>
+      } @else if (loadError()) {
+        <div class="error-card">
+          <p>{{ loadError() }}</p>
+          <button class="btn btn-secondary" (click)="loadProducts()">Retry</button>
+        </div>
+      } @else if (filteredProducts().length === 0) {
+        <p class="empty-state">No products found.</p>
+      } @else {
+        <div class="product-grid">
+          @for (p of filteredProducts(); track p.id) {
+            <button
+              class="product-tile"
+              [class.disabled]="p.stockQty <= 0"
+              [disabled]="p.stockQty <= 0"
+              (click)="addToCart(p)">
+              <div class="tile-name">{{ p.name }}</div>
+              <div class="tile-meta">{{ p.category }}</div>
+              <div class="tile-bottom">
+                <span class="tile-price">Rs. {{ p.salePrice | number:'1.0-0' }}</span>
+                <span class="tile-stock" [class.low]="p.stockQty <= p.reorderLevel && p.stockQty > 0" [class.out]="p.stockQty <= 0">
+                  {{ p.stockQty <= 0 ? 'Out of stock' : p.stockQty + ' ' + p.unit }}
+                </span>
+              </div>
+            </button>
+          }
+        </div>
+      }
+    </div>
+
+    <!-- RIGHT: Cart / bill summary -->
+    <div class="cart-panel">
+      <div class="card cart-card">
+        <h3>Bill Items ({{ cart().length }})</h3>
+
+        @if (cart().length === 0) {
+          <p class="empty-state">No items added yet. Click a product on the left.</p>
+        } @else {
+          <div class="cart-list">
+            @for (item of cart(); track item.productId) {
+              <div class="cart-item">
+          <div class="cart-item-info">
+            <div class="cart-item-name">{{ item.name }}</div>
+            <div class="cart-item-price">Rs. {{ item.price | number:'1.0-0' }} / {{ item.unit }}</div>
+          </div>
+
+          <div class="qty-control">
+            <button class="qty-btn" (click)="updateQuantity(item, item.quantity - 1)">−</button>
+            <input type="number" class="qty-input"
+              [ngModel]="item.quantity" (ngModelChange)="updateQuantity(item, $event)" />
+            <button class="qty-btn" (click)="updateQuantity(item, item.quantity + 1)">+</button>
+          </div>
+
+          <div class="discount-control">
+            <span class="discount-label">Discount</span>
+            <input type="number" class="discount-input" min="0"
+              [ngModel]="item.discount" (ngModelChange)="updateDiscount(item, $event)" />
+          </div>
+
+          <div class="cart-item-total">
+            @if (item.discount > 0) {
+              <div class="gross-strike">Rs. {{ item.price * item.quantity | number:'1.0-0' }}</div>
+            }
+            <div class="net-total">Rs. {{ item.price * item.quantity - item.discount | number:'1.0-0' }}</div>
+          </div>
+
+          <button class="remove-btn" (click)="removeFromCart(item)" title="Remove">✕</button>
+        </div>
+            }
+          </div>
+        }
+
+        <div class="cart-divider"></div>
+
+        <label class="field">
+          <span>Customer (optional)</span>
+          <select class="input" [ngModel]="selectedCustomerId()" (ngModelChange)="selectedCustomerId.set($event)">
+            <option [ngValue]="null">Walk-in Customer</option>
+            @for (c of customers(); track c.id) {
+              <option [ngValue]="c.id">{{ c.name }} — {{ c.phone }}</option>
+            }
+          </select>
+        </label>
+
+        <div class="totals-block">
+          <div class="totals-row">
+            <span>Subtotal</span>
+            <span>Rs. {{ subtotal() | number:'1.0-0' }}</span>
+            <span>Rs. {{ subtotal() + totalDiscount() | number:'1.0-0' }}</span>
+            @if (totalDiscount() > 0) {
+                <div class="totals-row discount-row">
+                  <span>Total Discount</span>
+                  <span>− Rs. {{ totalDiscount() | number:'1.0-0' }}</span>
+                </div>
+              }
+          </div>
+          <div class="totals-row net-row">
+            <span>Net Total</span>
+            <span>Rs. {{ subtotal() | number:'1.0-0' }}</span>
+          </div>
+
+          <label class="field">
+            <span>Amount Paid</span>
+            <input
+              type="number"
+              class="input"
+              min="0"
+              [ngModel]="paidAmount()"
+              (ngModelChange)="paidAmount.set($event)" />
+          </label>
+
+          <label class="field">
+            <span>Payment Method</span>
+            <div class="payment-method-toggle">
+              <button type="button" class="btn btn-sm"
+                [class.btn-primary]="paymentMethod() === 'Cash'"
+                [class.btn-secondary]="paymentMethod() !== 'Cash'"
+                (click)="paymentMethod.set('Cash')">💵 Cash</button>
+              <button type="button" class="btn btn-sm"
+                [class.btn-primary]="paymentMethod() === 'Online'"
+                [class.btn-secondary]="paymentMethod() !== 'Online'"
+                (click)="paymentMethod.set('Online')">🏦 Online</button>
+            </div>
+          </label>
+
+          <div class="quick-pay-btns">
+            <button class="btn btn-secondary btn-sm" (click)="setPaidFull()">Mark Fully Paid</button>
+            <button class="btn btn-secondary btn-sm" (click)="setPaidZero()">Mark Unpaid</button>
+          </div>
+
+          <div class="totals-row outstanding-row">
+            <span>Outstanding</span>
+            <span>Rs. {{ outstanding() | number:'1.0-0' }}</span>
+          </div>
+
+          <div class="status-preview">
+            <span>Status:</span>
+            <span class="badge"
+              [class.badge-success]="status() === 'Paid'"
+              [class.badge-warning]="status() === 'Partial'"
+              [class.badge-danger]="status() === 'Unpaid'">
+              {{ status() }}
+            </span>
+          </div>
+        </div>
+
+        @if (submitError()) {
+          <div class="form-error">{{ submitError() }}</div>
+        }
+
+        <button
+          class="btn btn-primary btn-full"
+          [disabled]="cart().length === 0 || isSubmitting()"
+          (click)="submitBill()">
+          {{ isSubmitting() ? 'Processing...' : 'Generate Bill' }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Receipt Modal -->
+@if (completedBill(); as bill) {
+  <div class="modal-backdrop">
+    <div class="modal card receipt-modal">
+      <div class="receipt" id="printable-receipt">
+        <div class="receipt-header">
+          <h2>{{ storeName }}</h2>
+          <p class="receipt-sub">Sale Receipt</p>
+        </div>
+
+        <div class="receipt-meta">
+          <div><span>Bill #</span><span>{{ bill.id }}</span></div>
+          <div><span>Date</span><span>{{ bill.billDate | date:'medium' }}</span></div>
+          <div><span>Customer</span><span>{{ bill.customerName || 'Walk-in Customer' }}</span></div>
+          <div><span>Payment Method</span><span>{{ bill.paymentMethod }}</span></div>
+        </div>
+
+                <table class="receipt-table">
+          <thead>
+            <tr><th>Item</th><th>Qty</th><th>Price</th><th>Disc.</th><th>Total</th></tr>
+          </thead>
+          <tbody>
+            @for (item of bill.items; track item.productId) {
+              <tr>
+                <td>{{ item.productName }}</td>
+                <td>{{ item.quantity }}</td>
+                <td>{{ item.unitPrice | number:'1.0-0' }}</td>
+                <td>{{ item.discountAmount > 0 ? (item.discountAmount | number:'1.0-0') : '—' }}</td>
+                <td>{{ item.lineTotal | number:'1.0-0' }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+
+        <div class="receipt-totals">
+          <div><span>Total</span><span>Rs. {{ bill.totalAmount | number:'1.0-0' }}</span></div>
+          <div><span>Paid</span><span>Rs. {{ bill.paidAmount | number:'1.0-0' }}</span></div>
+          <div class="outstanding"><span>Outstanding</span><span>Rs. {{ bill.outstandingAmount | number:'1.0-0' }}</span></div>
+        </div>
+
+        <p class="receipt-footer">Thank you for shopping with {{ storeName }}!</p>
+        <p class="receipt-footer">Contact no. +92300-4666107</p>
+        <p class="receipt-footer">   </p>
+        <p class="receipt-footer">This bill is not for legal purposes</p>
+      </div>
+
+      <div class="modal-actions no-print">
+        <button class="btn btn-secondary" (click)="closeReceipt()">Close</button>
+        <button class="btn btn-primary" (click)="printReceipt()">🖨️ Print Receipt</button>
+      </div>
+    </div>
+  </div>
+}

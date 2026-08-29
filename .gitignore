@@ -1,0 +1,44 @@
+## ---------- .NET / ASP.NET Core (Backend) ----------
+Backend/bin/
+Backend/obj/
+Backend/**/bin/
+Backend/**/obj/
+*.user
+*.suo
+.vs/
+
+## Local SQLite databases must never be committed
+*.db
+*.db-shm
+*.db-wal
+
+## User secrets / local config overrides
+appsettings.Local.json
+appsettings.*.local.json
+
+## ---------- Angular / Node (Frontend) ----------
+Frontend/node_modules/
+Frontend/dist/
+Frontend/.angular/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+## ---------- Build & Installer output ----------
+setup/Build/
+setup/Output/
+Build/
+Output/
+*.exe
+!setup/*.exe.manifest
+
+## ---------- OS / Editor cruft ----------
+.DS_Store
+Thumbs.db
+*.log
+.idea/
+*.swp
+
+## ---------- Sensitive local files ----------
+**/Credentials.png
+**/*secrets*

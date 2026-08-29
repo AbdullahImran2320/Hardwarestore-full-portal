@@ -1,0 +1,32 @@
+.back-link { color: var(--color-text-muted); text-decoration: none; font-size: 0.85rem; display: inline-block; margin-bottom: var(--space-md); &:hover { color: var(--color-primary); } }
+
+.stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-md); margin-bottom: var(--space-md); @media (max-width: 640px) { grid-template-columns: 1fr; } }
+.stat-mini { text-align: center; }
+.stat-label { font-size: 0.78rem; color: var(--color-text-muted); font-weight: 600; }
+.stat-value { font-size: 1.3rem; font-weight: 700; margin-top: 0.2rem; }
+.stat-value.danger { color: var(--color-danger); }
+
+.bill-list { display: flex; flex-direction: column; gap: var(--space-sm); margin-top: var(--space-sm); }
+.bill-row {
+  display: flex; align-items: center; gap: var(--space-md);
+  padding: var(--space-sm) var(--space-md);
+  background: var(--color-surface-alt);
+  border-radius: var(--radius-sm);
+  flex-wrap: wrap;
+}
+.bill-row-main { min-width: 90px; }
+.bill-id { font-weight: 600; font-size: 0.88rem; }
+.bill-date { font-size: 0.75rem; color: var(--color-text-muted); }
+.bill-row-amounts { display: flex; flex-direction: column; font-size: 0.78rem; color: var(--color-text-muted); margin-left: auto; }
+.btn-sm { padding: 0.4rem 0.7rem; font-size: 0.78rem; }
+
+.form-grid-single { display: flex; flex-direction: column; gap: var(--space-md); margin: var(--space-md) 0; }
+.payment-method-toggle { display: flex; gap: var(--space-xs); }
+.field { display: flex; flex-direction: column; gap: 0.3rem; span { font-size: 0.8rem; font-weight: 600; color: var(--color-text-muted); } }
+.modal-sub { color: var(--color-text-muted); font-size: 0.85rem; margin-top: -0.5rem; }
+.modal-actions { display: flex; justify-content: flex-end; gap: var(--space-sm); margin-top: var(--space-md); }
+.form-error { background: #fce8e8; color: var(--color-danger); padding: var(--space-sm); border-radius: var(--radius-sm); font-size: 0.85rem; margin-bottom: var(--space-sm); }
+
+.skeleton-block { height: 200px; background: linear-gradient(90deg, var(--color-surface-alt) 25%, #e8e3db 50%, var(--color-surface-alt) 75%); background-size: 200% 100%; animation: shimmer 1.4s infinite; }
+.empty-state { color: var(--color-text-muted); text-align: center; padding: var(--space-lg) 0; }
+.error-card { text-align: center; color: var(--color-danger); padding: var(--space-lg); p { margin-bottom: var(--space-md); } }

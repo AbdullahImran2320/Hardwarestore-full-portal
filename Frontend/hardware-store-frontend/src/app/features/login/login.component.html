@@ -1,0 +1,27 @@
+<div class="login-page">
+  <div class="card login-card">
+    <div class="login-brand">
+      <span class="brand-icon">🔧</span>
+      <h1>SM Traders</h1>
+      <p>Hardware Store Portal</p>
+    </div>
+
+    @if (errorMsg()) { <div class="form-error">{{ errorMsg() }}</div> }
+
+    <label class="field">
+      <span>Username</span>
+      <input type="text" class="input" [ngModel]="username()" (ngModelChange)="username.set($event)"
+        (keyup.enter)="submit()" />
+    </label>
+
+    <label class="field">
+      <span>Password</span>
+      <input type="password" class="input" [ngModel]="password()" (ngModelChange)="password.set($event)"
+        (keyup.enter)="submit()" />
+    </label>
+
+    <button class="btn btn-primary btn-full" (click)="submit()" [disabled]="isLoading()">
+      {{ isLoading() ? 'Signing in...' : 'Sign In' }}
+    </button>
+  </div>
+</div>

@@ -1,0 +1,57 @@
+<div class="shell">
+  <!-- Mobile top bar -->
+  <header class="mobile-topbar">
+    <button class="icon-btn" (click)="toggleMobileNav()" aria-label="Toggle menu">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+      </svg>
+    </button>
+    <span class="mobile-title">🔧 Hardware Store</span>
+    <span class="mobile-spacer"></span>
+  </header>
+
+  <!-- Sidebar -->
+  <aside class="sidebar" [class.open]="isMobileNavOpen()">
+    <div class="sidebar-brand">
+      <span class="brand-icon">🔧</span>
+      <div>
+        <div class="brand-name">Hardware Store</div>
+        <div class="brand-sub">Portal</div>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      @for (item of navItems; track item.path) {
+       <a 
+          [routerLink]="item.path"
+          routerLinkActive="active"
+          class="nav-link"
+          (click)="closeMobileNav()">
+
+          <span class="nav-dot"></span>
+          {{ item.label }}
+      </a>
+      }
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="user-chip">
+  <div class="avatar">{{ authService.currentUser()?.username?.charAt(0)?.toUpperCase() }}</div>
+  <div>
+    <div class="user-name">{{ authService.currentUser()?.username }}</div>
+    <div class="user-role">{{ authService.currentUser()?.role }}</div>
+  </div>
+  <button class="logout-btn" (click)="logout()" title="Logout">⏻</button>
+</div>
+    </div>
+  </aside>
+
+  @if (isMobileNavOpen()) {
+    <div class="backdrop" (click)="closeMobileNav()"></div>
+  }
+
+  <!-- Main content -->
+  <main class="main-content">
+    <router-outlet></router-outlet>
+  </main>
+</div>

@@ -1,0 +1,78 @@
+<div class="page">
+  <div class="page-header">
+    <div>
+      <h1>Customers</h1>
+      <p class="page-sub">
+        {{ customers().length }} customers ·
+        <span class="danger-text">Rs. {{ totalOutstandingAcrossAll() | number:'1.0-0' }} total outstanding</span>
+      </p>
+    </div>
+    <button class="btn btn-primary" (click)="openAddModal()">+ Add Customer</button>
+  </div>
+
+  <div class="filter-bar card">
+    <input
+      type="text"
+      class="input search-input"
+      placeholder="Search by name or phone..."
+      [ngModel]="searchTerm()"
+      (ngModelChange)="searchTerm.set($event)" />
+  </div>
+
+  @if (isLoading()) {
+    <div class="card skeleton-block"></div>
+  } @else if (errorMsg()) {
+    <div class="card error-card">
+      <p>{{ errorMsg() }}</p>
+      <button class="btn btn-secondary" (click)="loadCustomers()">Retry</button>
+    </div>
+  } @else if (filteredCustomers().length === 0) {
+    <div class="card empty-state-block">
+      <p>{{ customers().length === 0 ? 'No customers yet — add your first one.' : 'No customers match your search.' }}</p>
+    </div>
+  } @else {
+    <div class="customer-grid">
+      @for (c of filteredCustomers(); track c.id) {
+        <a [routerLink]="['/customers', c.id]" class="card customer-card">
+          <div class="customer-card-top">
+            <div class="avatar-sm">{{ c.name.charAt(0) }}</div>
+            <div>
+              <div class="customer-name">{{ c.name }}</div>
+              <div class="customer-phone">{{ c.phone }}</div>
+            </div>
+          </div>
+          <div class="customer-card-bottom">
+            <span class="bill-count">{{ c.billCount }} bill{{ c.billCount !== 1 ? 's' : '' }}</span>
+            @if (c.totalOutstanding > 0) {
+              <span class="badge badge-danger">Rs. {{ c.totalOutstanding | number:'1.0-0' }} due</span>
+            } @else {
+              <span class="badge badge-success">Settled</span>
+            }
+          </div>
+        </a>
+      }
+    </div>
+  }
+</div>
+
+@if (isModalOpen()) {
+  <div class="modal-backdrop" (click)="closeModal()">
+    <div class="modal card" (click)="$event.stopPropagation()">
+      <h3>Add Customer</h3>
+      @if (formError()) { <div class="form-error">{{ formError() }}</div> }
+
+      <div class="form-grid-single">
+        <label class="field"><span>Name</span><input type="text" class="input" [(ngModel)]="form.name" placeholder="Customer name" /></label>
+        <label class="field"><span>Phone</span><input type="text" class="input" [(ngModel)]="form.phone" placeholder="03xx-xxxxxxx" /></label>
+        <label class="field"><span>Address (optional)</span><input type="text" class="input" [(ngModel)]="form.address" placeholder="Address" /></label>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn btn-secondary" (click)="closeModal()" [disabled]="isSaving()">Cancel</button>
+        <button class="btn btn-primary" (click)="save()" [disabled]="isSaving()">
+          {{ isSaving() ? 'Saving...' : 'Add Customer' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}

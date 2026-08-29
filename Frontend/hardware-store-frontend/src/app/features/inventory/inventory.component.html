@@ -1,0 +1,290 @@
+<div class="page">
+<div class="page-header">
+    <div>
+      <h1>Inventory</h1>
+      <p class="page-sub">{{ filteredProducts().length }} of {{ products().length }} products</p>
+    </div>
+    <div style="display:flex; gap:0.75rem;">
+      <button class="btn btn-secondary" (click)="openAddCategoryModal()">+ Add Category</button>
+      <button class="btn btn-primary" (click)="openAddModal()">+ Add Product</button>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="filter-bar card">
+    <input
+      type="text"
+      placeholder="Search by name or category..."
+      class="input search-input"
+      [ngModel]="searchTerm()"
+      (ngModelChange)="searchTerm.set($event)" />
+
+    <select class="input" [ngModel]="categoryFilter()" (ngModelChange)="categoryFilter.set($event)">
+      @for (c of categories(); track c) {
+        <option [value]="c">{{ c }}</option>
+      }
+    </select>
+  </div>
+
+  @if (isLoading()) {
+    <div class="card skeleton-block"></div>
+  } @else if (errorMsg()) {
+    <div class="card error-card">
+      <p>{{ errorMsg() }}</p>
+      <button class="btn btn-secondary" (click)="loadProducts()">Retry</button>
+    </div>
+  } @else if (filteredProducts().length === 0) {
+    <div class="card empty-state-block">
+      <p>{{ products().length === 0 ? 'No products yet — add your first one.' : 'No products match your search.' }}</p>
+    </div>
+  } @else {
+    <!-- Desktop table -->
+    <div class="card table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Product</th><th>Category</th><th>Unit</th>
+            <th>Stock</th><th>Sale Price</th><th></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (p of filteredProducts(); track p.id) {
+         
+            <tr>
+              <td class="product-name">{{ p.name }}</td>
+              <td>{{ p.category }}</td>
+              <td>{{ p.unit }}</td>
+              <td>
+                <span class="badge"
+                  [class.badge-danger]="stockStatus(p) === 'out'"
+                  [class.badge-warning]="stockStatus(p) === 'low'"
+                  [class.badge-success]="stockStatus(p) === 'ok'">
+                  {{ p.stockQty }} {{ p.unit }}
+                </span>
+              </td>
+              <td>Rs. {{ p.salePrice | number:'1.0-0' }}</td>
+              <td class="row-actions">
+                <button class="icon-btn-sm" (click)="openEditModal(p)" title="Edit">✏️</button>
+                <button class="icon-btn-sm" (click)="openStockModal(p)" title="Adjust Stock">📦</button>
+                <button class="icon-btn-sm danger" (click)="deleteProduct(p)" title="Delete">🗑️</button>
+                   @if (authService.isAdmin()) {
+             <button class="icon-btn-sm" (click)="openCostModal(p)" title="Edit Cost (Admin)">💲</button>}
+              
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Mobile cards -->
+    <div class="mobile-cards">
+      @for (p of filteredProducts(); track p.id) {
+        <div class="card product-card">
+          <div class="product-card-top">
+            <div>
+              <div class="product-name">{{ p.name }}</div>
+              <div class="product-meta">{{ p.category }} · {{ p.unit }}</div>
+            </div>
+            <span class="badge"
+              [class.badge-danger]="stockStatus(p) === 'out'"
+              [class.badge-warning]="stockStatus(p) === 'low'"
+              [class.badge-success]="stockStatus(p) === 'ok'">
+              {{ p.stockQty }} left
+            </span>
+          </div>
+          <div class="product-card-bottom">
+            <span class="price">Rs. {{ p.salePrice | number:'1.0-0' }}</span>
+            <div class="row-actions">
+              <button class="icon-btn-sm" (click)="openEditModal(p)">✏️</button>
+              <button class="icon-btn-sm" (click)="openStockModal(p)" title="Adjust Stock">📦</button>
+              <button class="icon-btn-sm danger" (click)="deleteProduct(p)">🗑️</button>
+              <button class="icon-btn-sm" (click)="openCostModal(p)" title="Edit Cost (Admin)">💲</button>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>
+
+<!-- Add/Edit Modal -->
+@if (isModalOpen()) {
+  <div class="modal-backdrop" (click)="closeModal()">
+    <div class="modal card" (click)="$event.stopPropagation()">
+      <h3>{{ isEditMode() ? 'Edit Product' : 'Add Product' }}</h3>
+
+      @if (formError()) {
+        <div class="form-error">{{ formError() }}</div>
+      }
+
+      <div class="form-grid">
+        <label class="field">
+          <span>Product Name</span>
+          <input type="text" class="input" [(ngModel)]="form.name" placeholder="e.g. PVC Elbow 1 inch" />
+        </label>
+
+              <label class="field">
+          <span>Category</span>
+          <select class="input" [(ngModel)]="form.categoryId">
+            <option [value]="0" disabled>Select a category</option>
+            @for (c of allCategories(); track c.id) {
+              <option [value]="c.id">{{ c.name }}</option>
+            }
+          </select>
+        </label>
+
+        <label class="field">
+          <span>Unit</span>
+          <input type="text" class="input" [(ngModel)]="form.unit" placeholder="e.g. Piece, Meter, Box" />
+        </label>
+
+        @if (!isEditMode()) {
+          <label class="field">
+            <span>Opening Stock Qty</span>
+            <input type="number" class="input" [(ngModel)]="form.stockQty" min="0" />
+          </label>
+        } @else {
+          <label class="field">
+            <span>Current Stock</span>
+            <input type="text" class="input" [value]="form.stockQty + ' (adjust via Stock Transactions)'" disabled />
+          </label>
+        }
+
+        <label class="field">
+          <span>Purchase Price (Cost)</span>
+          <input type="number" class="input" [(ngModel)]="form.purchasePrice" min="0" step="0.01" />
+        </label>
+
+        <label class="field">
+          <span>Sale Price</span>
+          <input type="number" class="input" [(ngModel)]="form.salePrice" min="0" step="0.01" />
+        </label>
+
+        <label class="field">
+          <span>Reorder Level</span>
+          <input type="number" class="input" [(ngModel)]="form.reorderLevel" min="0" />
+        </label>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn btn-secondary" (click)="closeModal()" [disabled]="isSaving()">Cancel</button>
+        <button class="btn btn-primary" (click)="save()" [disabled]="isSaving()">
+          {{ isSaving() ? 'Saving...' : (isEditMode() ? 'Save Changes' : 'Add Product') }}
+        </button>
+      </div>
+    </div>
+  </div>
+}
+@if (isCostModalOpen()) {
+  <div class="modal-backdrop" (click)="closeCostModal()">
+    <div class="modal card cost-modal" (click)="$event.stopPropagation()">
+      <h3>Edit Cost Price <span class="admin-tag">Admin</span></h3>
+      <p class="modal-sub">{{ costForm()?.productName }}</p>
+
+      @if (costError()) {
+        <div class="form-error">{{ costError() }}</div>
+      }
+
+      <label class="field">
+        <span>Purchase Price (Cost)</span>
+        <input
+          type="number"
+          class="input"
+          min="0" step="0.01"
+          [ngModel]="costForm()?.purchasePrice"
+          (ngModelChange)="costForm.set({...costForm()!, purchasePrice: $event})" />
+      </label>
+
+      <div class="modal-actions">
+        <button class="btn btn-secondary" (click)="closeCostModal()" [disabled]="isCostSaving()">Cancel</button>
+        <button class="btn btn-primary" (click)="saveCost()" [disabled]="isCostSaving()">
+          {{ isCostSaving() ? 'Saving...' : 'Save Cost' }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+
+  
+}
+
+@if (isStockModalOpen()) {
+  <div class="modal-backdrop" (click)="closeStockModal()">
+    <div class="modal card" (click)="$event.stopPropagation()">
+      <h3>Adjust Stock</h3>
+      <p class="modal-sub">{{ stockAdjustProduct()?.name }} — currently {{ stockAdjustProduct()?.stockQty }} {{ stockAdjustProduct()?.unit }}</p>
+
+      @if (stockError()) {
+        <div class="form-error">{{ stockError() }}</div>
+      }
+
+      <div class="form-grid-single">
+        <label class="field">
+          <span>Type</span>
+          <select class="input" [ngModel]="stockAdjustType()" (ngModelChange)="stockAdjustType.set($event)">
+            <option value="Restock">Restock (add stock)</option>
+            <option value="Damage">Damage / Loss (remove stock)</option>
+            <option value="Adjustment">Adjustment (+/- manual count)</option>
+          </select>
+        </label>
+
+        <label class="field">
+          <span>{{ stockAdjustType() === 'Adjustment' ? 'Quantity Change (use - to reduce)' : 'Quantity' }}</span>
+          <input type="number" class="input"
+            [ngModel]="stockAdjustQty()" (ngModelChange)="stockAdjustQty.set($event)" />
+        </label>
+
+        <label class="field">
+          <span>Reference (optional)</span>
+          <input type="text" class="input" placeholder="e.g. Supplier invoice #45"
+            [ngModel]="stockAdjustReference()" (ngModelChange)="stockAdjustReference.set($event)" />
+        </label>
+      </div>
+
+           <div class="modal-actions">
+        <button class="btn btn-secondary" (click)="closeStockModal()" [disabled]="isStockSaving()">Cancel</button>
+        <button class="btn btn-primary" (click)="saveStockAdjustment()" [disabled]="isStockSaving()">
+          {{ isStockSaving() ? 'Saving...' : 'Save' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+@if (isCategoryModalOpen()) {
+  <div class="modal-backdrop" (click)="closeCategoryModal()">
+    <div class="modal card category-modal" (click)="$event.stopPropagation()">
+      <h3>Manage Categories</h3>
+
+      @if (categoryFormError()) {
+        <div class="form-error">{{ categoryFormError() }}</div>
+      }
+
+      @if (allCategories().length > 0) {
+        <div class="category-list">
+          @for (c of allCategories(); track c.id) {
+            <div class="category-list-row">
+              <span>{{ c.name }}</span>
+              <button class="icon-btn-sm danger" (click)="deleteCategory(c)" title="Delete">🗑️</button>
+            </div>
+          }
+        </div>
+      }
+
+      <label class="field">
+        <span>Add New Category</span>
+        <input type="text" class="input"
+          [ngModel]="newCategoryName()" (ngModelChange)="newCategoryName.set($event)"
+          placeholder="e.g. Plumbing" />
+      </label>
+
+      <div class="modal-actions">
+        <button class="btn btn-secondary" (click)="closeCategoryModal()" [disabled]="isCategorySaving()">Close</button>
+        <button class="btn btn-primary" (click)="saveCategory()" [disabled]="isCategorySaving()">
+          {{ isCategorySaving() ? 'Saving...' : 'Add Category' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}

@@ -1,0 +1,103 @@
+
+
+<div class="page">
+  <div class="page-header">
+    <div>
+      <h1>Dashboard</h1>
+      <p class="page-sub">Today's overview — {{ report()?.date | date:'fullDate' }}</p>
+    </div>
+    <a routerLink="/billing" class="btn btn-primary">
+      + New Bill
+    </a>
+  </div>
+
+  @if (isLoading()) {
+    <div class="skeleton-grid">
+      @for (i of [1,2,3,4]; track i) {
+        <div class="card skeleton-card"></div>
+      }
+    </div>
+  } @else if (errorMsg()) {
+    <div class="card error-card">
+      <p>{{ errorMsg() }}</p>
+      <button class="btn btn-secondary" (click)="loadDashboard()">Retry</button>
+    </div>
+  } @else {
+    <!-- Stat cards -->
+    <div class="stats-grid">
+      <div class="card stat-card">
+        <div class="stat-icon sales">💰</div>
+        <div>
+          <div class="stat-label">Total Sales Today</div>
+          <div class="stat-value">Rs. {{ report()?.totalSales | number:'1.0-0' }}</div>
+        </div>
+      </div>
+
+      <div class="card stat-card">
+        <div class="stat-icon paid">✅</div>
+        <div>
+          <div class="stat-label">Collected</div>
+          <div class="stat-value">Rs. {{ report()?.totalPaid | number:'1.0-0' }}</div>
+        </div>
+      </div>
+
+      <div class="card stat-card">
+        <div class="stat-icon outstanding">⏳</div>
+        <div>
+          <div class="stat-label">Outstanding</div>
+          <div class="stat-value danger">Rs. {{ report()?.totalOutstanding | number:'1.0-0' }}</div>
+        </div>
+      </div>
+
+      <div class="card stat-card">
+        <div class="stat-icon bills">🧾</div>
+        <div>
+          <div class="stat-label">Bills Today</div>
+          <div class="stat-value">{{ report()?.billCount }}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="content-grid">
+      <!-- Top products -->
+      <div class="card">
+        <h3>Top Selling Products Today</h3>
+        @if (report()?.topProducts?.length) {
+          <table class="data-table">
+            <thead>
+              <tr><th>Product</th><th>Qty Sold</th><th>Revenue</th></tr>
+            </thead>
+            <tbody>
+              @for (p of report()?.topProducts; track p.productName) {
+                <tr>
+                  <td>{{ p.productName }}</td>
+                  <td>{{ p.quantitySold }}</td>
+                  <td>Rs. {{ p.revenue | number:'1.0-0' }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        } @else {
+          <p class="empty-state">No sales recorded yet today.</p>
+        }
+      </div>
+
+      <!-- Low stock alerts -->
+      <div class="card">
+        <h3>⚠️ Low Stock Alerts</h3>
+        @if (lowStockProducts().length) {
+          <ul class="alert-list">
+            @for (p of lowStockProducts(); track p.id) {
+              <li>
+                <span>{{ p.name }}</span>
+                <span class="badge badge-danger">{{ p.stockQty }} {{ p.unit }} left</span>
+              </li>
+            }
+          </ul>
+        } @else {
+          <p class="empty-state">All stock levels are healthy ✅</p>
+        }
+      </div>
+    </div>
+  }
+</div>
