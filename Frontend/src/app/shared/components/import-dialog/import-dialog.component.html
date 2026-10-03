@@ -1,0 +1,93 @@
+<div class="modal-backdrop" (click)="close()">
+  <div class="card modal modal-wide" (click)="$event.stopPropagation()">
+    <h3>{{ title() }}</h3>
+
+    @if (result(); as r) {
+      <div class="form-success">
+        Import complete: {{ r.created }} created, {{ r.updated }} updated.
+        @if (r.skipped > 0) { {{ r.skipped }} row(s) skipped. }
+        @if (r.categoriesCreated > 0) { {{ r.categoriesCreated }} new categories created. }
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-primary" (click)="close()">Done</button>
+      </div>
+    } @else {
+      <p class="hint">
+        Use the template so the column names match. Nothing is saved until you press Import.
+        <button type="button" class="link-btn" (click)="downloadTemplate()">Download template</button>
+      </p>
+
+      @if (error()) { <div class="form-error">{{ error() }}</div> }
+
+      <div class="file-row">
+        <input type="file" class="input" accept=".xlsx" (change)="onFileChosen($event)" />
+        <button class="btn btn-secondary" (click)="runPreview()" [disabled]="busy() || !file()">
+          {{ busy() && !preview() ? 'Reading...' : 'Preview' }}
+        </button>
+      </div>
+
+      @if (preview(); as p) {
+        <div class="summary">
+          <span class="pill">{{ p.totalRows }} rows</span>
+          <span class="pill ok">{{ p.toCreate }} new</span>
+          <span class="pill ok">{{ p.toUpdate }} update</span>
+          @if (p.errorCount > 0) { <span class="pill bad">{{ p.errorCount }} with errors</span> }
+        </div>
+
+        @if (p.newCategories.length > 0) {
+          <div class="form-warning">New categories will be created: {{ p.newCategories.join(', ') }}</div>
+        }
+
+        <div class="table-scroll">
+          <table class="data-table">
+            <thead>
+              @if (kind() === 'products') {
+                <tr>
+                  <th>Row</th><th>Result</th><th>Name</th><th>Category</th><th>Unit</th>
+                  <th>Stock</th><th>Sale price</th><th>Details</th>
+                </tr>
+              } @else {
+                <tr>
+                  <th>Row</th><th>Result</th><th>Name</th><th>Phone</th><th>Address</th><th>Details</th>
+                </tr>
+              }
+            </thead>
+            <tbody>
+              @for (row of p.rows; track row.rowNumber) {
+                <tr [class.row-error]="row.action === 'Error'">
+                  <td>{{ row.rowNumber }}</td>
+                  <td>{{ row.action }}</td>
+                  <td>{{ row.name }}</td>
+                  @if (kind() === 'products') {
+                    <td>{{ row.category }}</td>
+                    <td>{{ row.unit }}</td>
+                    <td>{{ row.stock }}</td>
+                    <td>{{ row.salePrice }}</td>
+                  } @else {
+                    <td>{{ row.phone }}</td>
+                    <td>{{ row.address }}</td>
+                  }
+                  <td class="messages">{{ row.messages.join(' ') }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        @if (p.errorCount > 0) {
+          <label class="skip-row">
+            <input type="checkbox" [checked]="skipInvalid()" (change)="skipInvalid.set(!skipInvalid())" />
+            Skip the {{ p.errorCount }} row(s) with errors and import the rest
+          </label>
+        }
+      }
+
+      <div class="modal-actions">
+        <button class="btn btn-secondary" (click)="close()">Cancel</button>
+        <button class="btn btn-primary" (click)="runImport()" [disabled]="!canImport()">
+          {{ busy() && preview() ? 'Importing...' : 'Import ' + importableRows() + ' rows' }}
+        </button>
+      </div>
+    }
+  </div>
+</div>

@@ -5,17 +5,19 @@ import { RouterLink } from '@angular/router';
 import { BillService } from '../../core/services/bill.service';
 import { PaymentService } from '../../core/services/payment.service';
 import { Bill } from '../../core/models/bill.model';
+import { ExportButtonComponent } from '../../shared/components/export-button/export-button.component';
 
 type StatusFilter = 'All' | 'Paid' | 'Partial' | 'Unpaid';
 
 @Component({
   selector: 'app-bills',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink, ExportButtonComponent],
   templateUrl: './bills.component.html',
   styleUrl: './bills.component.scss'
 })
 export class BillsComponent implements OnInit {
+
   bills = signal<Bill[]>([]);
   isLoading = signal(true);
   errorMsg = signal<string | null>(null);

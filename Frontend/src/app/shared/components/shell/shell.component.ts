@@ -3,11 +3,12 @@ import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
+import { ThemeToggleComponent } from '../theme-toggle/theme-toggle.component';
 
 @Component({
   selector: 'app-shell',
   standalone: true,
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, CommonModule],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, CommonModule, ThemeToggleComponent],
   templateUrl: './shell.component.html',
   styleUrl: './shell.component.scss'
 })
@@ -21,12 +22,19 @@ export class ShellComponent {
     { path: '/bills', label: 'All Bills', icon: 'list' },
     { path: '/customers', label: 'Customers', icon: 'users' },
   ];
+
+  // Only shown to Admins.
+  adminItems = [
+    { path: '/users', label: 'Users' },
+    { path: '/backup', label: 'Backup & Restore' },
+  ];
+
   constructor(public authService: AuthService, private router: Router) {}
 
-logout() {
-  this.authService.logout();
-  this.router.navigate(['/login']);
-}
+  logout() {
+    this.authService.logout();
+    this.router.navigate(['/login']);
+  }
 
   toggleMobileNav() {
     this.isMobileNavOpen.update(v => !v);

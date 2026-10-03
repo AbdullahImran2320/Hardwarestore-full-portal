@@ -13,11 +13,16 @@ var dbFolder = Path.Combine(
     Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData),
     "HardwareStorePortal");
 Directory.CreateDirectory(dbFolder);
-var dbPath = Path.Combine(dbFolder, "hardwarestore.db");
+var dbPaths = new DatabasePaths(dbFolder);
+builder.Services.AddSingleton(dbPaths);
 
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlite($"Data Source={dbPath}"));
-var jwtKey = builder.Configuration["Jwt:Key"]!;
+    options.UseSqlite($"Data Source={dbPaths.DbPath}"));
+
+// The installed app signs logins with a random per-PC key (see JwtKeyProvider).
+var jwtKey = JwtKeyProvider.Resolve(
+    builder.Configuration["Jwt:Key"], dbFolder, builder.Environment.IsDevelopment());
+builder.Configuration["Jwt:Key"] = jwtKey;
 
 builder.Services.AddAuthentication(options =>
 {
@@ -48,6 +53,10 @@ builder.Services.AddScoped<IBillRepository, BillRepository>();
 builder.Services.AddScoped<IBillService, BillService>();
 builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
 builder.Services.AddScoped<IPaymentService, PaymentService>();
+builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<ExcelExportService>();
+builder.Services.AddScoped<ExcelImportService>();
+builder.Services.AddSingleton<BackupService>();
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -91,7 +100,8 @@ builder.Services.AddCors(options =>
     {
         policy.WithOrigins("http://localhost:4200")
               .AllowAnyMethod()
-              .AllowAnyHeader();
+              .AllowAnyHeader()
+              .WithExposedHeaders("Content-Disposition");
     });
 });
 
@@ -100,38 +110,7 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    db.Database.Migrate();
-
-    var productsNeedingCategory = db.Products
-    .Where(p => p.CategoryId == null && p.LegacyCategoryText != null && p.LegacyCategoryText != "")
-    .ToList();
-
-    foreach (var product in productsNeedingCategory)
-    {
-        var categoryName = product.LegacyCategoryText!.Trim();
-
-        var category = db.Categories.FirstOrDefault(c => c.Name.ToLower() == categoryName.ToLower());
-        if (category == null)
-        {
-            category = new Category { Name = categoryName };
-            db.Categories.Add(category);
-            db.SaveChanges();
-        }
-
-        product.CategoryId = category.Id;
-    }
-
-    db.SaveChanges();
-
-    if (!db.Users.Any())
-    {
-        db.Users.AddRange(
-            new User { Username = "admin", Role = "Admin", PasswordHash = BCrypt.Net.BCrypt.HashPassword("Admin123!") },
-            new User { Username = "Muneeb", Role = "Admin", PasswordHash = BCrypt.Net.BCrypt.HashPassword("muneeb786") },
-            new User { Username = "Shahid", Role = "Staff", PasswordHash = BCrypt.Net.BCrypt.HashPassword("sm786") }
-        );
-        db.SaveChanges();
-    }
+    DbInitializer.Initialize(db);
 }
 
 // Swagger

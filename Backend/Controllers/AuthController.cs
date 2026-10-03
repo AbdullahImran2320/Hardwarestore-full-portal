@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using HardwareStorePortal.API.DTOs;
 using HardwareStorePortal.API.Services;
 
@@ -15,7 +16,9 @@ namespace HardwareStorePortal.API.Controllers
             _service = service;
         }
 
+        // Only an Admin can create accounts.
         [HttpPost("register")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Register(RegisterDTO dto)
         {
             try
@@ -35,6 +38,25 @@ namespace HardwareStorePortal.API.Controllers
             var result = await _service.LoginAsync(dto);
             if (result == null) return Unauthorized(new { message = "Invalid username or password." });
             return Ok(result);
+        }
+
+        // Any logged-in user can change their OWN password. The user id comes from the token.
+        [HttpPost("change-password")]
+        [Authorize]
+        public async Task<IActionResult> ChangePassword(ChangePasswordDTO dto)
+        {
+            var idClaim = HttpContext.User.FindFirst("userId")?.Value;
+            if (!int.TryParse(idClaim, out var userId)) return Unauthorized();
+
+            try
+            {
+                await _service.ChangePasswordAsync(userId, dto);
+                return NoContent();
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
     }
 }

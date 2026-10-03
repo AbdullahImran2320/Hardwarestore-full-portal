@@ -17,6 +17,17 @@
   --color-warning: #e8a800;
   --color-danger: #d63939;
 
+  // Tinted backgrounds and extras (every colour used by the app lives here, so dark mode only redefines tokens)
+  --color-success-bg: #e6f7e9;
+  --color-warning-bg: #fff6e0;
+  --color-warning-text: #a97a00;
+  --color-danger-bg: #fce8e8;
+  --color-skeleton: #e8e3db;
+  --color-overlay: rgba(43, 38, 34, 0.5);
+  --color-input-bg: #ffffff;
+  --sidebar-bg: #2b2622;
+  color-scheme: light;
+
   // Spacing scale
   --space-xs: 0.25rem;
   --space-sm: 0.5rem;
@@ -34,6 +45,41 @@
 
   // Typography
   --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+// ============ DARK THEME ============
+// Applied by ThemeService via <html data-theme="dark">.
+:root[data-theme='dark'] {
+  --color-primary: #e8590c;
+  --color-primary-dark: #c94a08;
+  --color-primary-light: #ff8c42;
+
+  --color-bg: #171411;
+  --color-surface: #221e1a;
+  --color-surface-alt: #2d2823;
+
+  --color-text: #f0ebe4;
+  --color-text-muted: #a89f94;
+  --color-border: #3a342d;
+
+  --color-success: #4cc764;
+  --color-warning: #f2b705;
+  --color-danger: #ff6b6b;
+
+  --color-success-bg: #1b3a24;
+  --color-warning-bg: #3d3210;
+  --color-warning-text: #f5c542;
+  --color-danger-bg: #4a2222;
+  --color-skeleton: #3a342d;
+  --color-overlay: rgba(0, 0, 0, 0.65);
+  --color-input-bg: #1c1815;
+  --sidebar-bg: #100e0c;
+
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.45);
+  --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.55);
+
+  color-scheme: dark;
 }
 
 * { box-sizing: border-box; }
@@ -95,9 +141,9 @@ h1, h2, h3, h4 { margin: 0 0 var(--space-sm) 0; font-weight: 600; letter-spacing
   font-size: 0.75rem;
   font-weight: 600;
 }
-.badge-success { background: #e6f7e9; color: var(--color-success); }
-.badge-warning { background: #fff6e0; color: #a97a00; }
-.badge-danger  { background: #fce8e8; color: var(--color-danger); }
+.badge-success { background: var(--color-success-bg); color: var(--color-success); }
+.badge-warning { background: var(--color-warning-bg); color: var(--color-warning-text); }
+.badge-danger  { background: var(--color-danger-bg); color: var(--color-danger); }
 
 // ============ MODERN DATA TABLE ============
 .data-table {
@@ -133,4 +179,125 @@ h1, h2, h3, h4 { margin: 0 0 var(--space-sm) 0; font-weight: 600; letter-spacing
     &:hover { background: var(--color-surface-alt); }
     &:last-child td { border-bottom: none; }
   }
+}
+
+// ============ SHARED FORM / PAGE / MODAL CLASSES ============
+// Used by the newer pages (account, users, backup, import). Older pages keep their own copies.
+:where(input, select, textarea) {
+  background-color: var(--color-input-bg);
+  color: var(--color-text);
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: var(--space-lg);
+  flex-wrap: wrap;
+  gap: var(--space-md);
+}
+.page-sub { color: var(--color-text-muted); margin: 0; font-size: 0.9rem; }
+.header-actions { display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: center; }
+
+.input {
+  padding: 0.6rem 0.8rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-sans);
+  font-size: 0.9rem;
+  background: var(--color-input-bg);
+  color: var(--color-text);
+
+  &:focus { outline: 2px solid var(--color-primary-light); outline-offset: 1px; }
+  &:disabled { background: var(--color-surface-alt); color: var(--color-text-muted); }
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  margin-bottom: var(--space-md);
+  span { font-size: 0.8rem; font-weight: 600; color: var(--color-text-muted); }
+}
+
+.form-error {
+  background: var(--color-danger-bg);
+  color: var(--color-danger);
+  padding: var(--space-sm);
+  border-radius: var(--radius-sm);
+  font-size: 0.85rem;
+  margin-bottom: var(--space-sm);
+}
+.form-success {
+  background: var(--color-success-bg);
+  color: var(--color-success);
+  padding: var(--space-sm);
+  border-radius: var(--radius-sm);
+  font-size: 0.85rem;
+  margin-bottom: var(--space-sm);
+}
+.form-warning {
+  background: var(--color-warning-bg);
+  color: var(--color-warning-text);
+  padding: var(--space-sm);
+  border-radius: var(--radius-sm);
+  font-size: 0.85rem;
+  margin-bottom: var(--space-sm);
+}
+
+.btn-danger {
+  background: var(--color-danger);
+  color: #fff;
+  &:hover { filter: brightness(0.9); }
+}
+.btn:disabled { opacity: 0.55; cursor: not-allowed; }
+
+.modal-backdrop {
+  position: fixed; inset: 0;
+  background: var(--color-overlay);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 50;
+  padding: var(--space-md);
+}
+.modal {
+  width: 100%;
+  max-width: 520px;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+.modal-wide { max-width: 860px; }
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-sm);
+  margin-top: var(--space-md);
+  flex-wrap: wrap;
+}
+
+.pill {
+  display: inline-block;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  background: var(--color-surface-alt);
+  color: var(--color-text);
+}
+.pill-admin { background: var(--color-primary); color: #fff; }
+
+// ============ PRINTING ============
+// Bills are always printed in light colours, even when the app is in dark mode.
+@media print {
+  :root,
+  :root[data-theme='dark'] {
+    --color-bg: #ffffff;
+    --color-surface: #ffffff;
+    --color-surface-alt: #f0ede8;
+    --color-text: #000000;
+    --color-text-muted: #555555;
+    --color-border: #cccccc;
+    --color-input-bg: #ffffff;
+    color-scheme: light;
+  }
+  body { background: #ffffff !important; color: #000000 !important; }
 }

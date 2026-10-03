@@ -1,0 +1,97 @@
+<div class="page">
+  <div class="page-header">
+    <div>
+      <h1>Backup &amp; Restore</h1>
+      <p class="page-sub">Protect your data. Only Admins can see this page.</p>
+    </div>
+  </div>
+
+  @if (successMsg()) { <div class="form-success">{{ successMsg() }}</div> }
+  @if (errorMsg()) { <div class="form-error">{{ errorMsg() }}</div> }
+
+  <div class="grid">
+    <div class="card">
+      <h3>Download backup</h3>
+      <p class="hint">Saves a copy of the whole database to this browser's Downloads folder. Safe to use while the shop is running.</p>
+      <button class="btn btn-primary" (click)="download()" [disabled]="isDownloading()">
+        {{ isDownloading() ? 'Preparing...' : '⬇ Download database' }}
+      </button>
+    </div>
+
+    <div class="card">
+      <h3>Copy to a folder</h3>
+      <p class="hint">Writes a dated copy into a folder on this PC, for example a USB drive such as <code>E:\Backups</code>. Leave empty to use the default folder.</p>
+      <label class="field">
+        <span>Folder path</span>
+        <input class="input" placeholder="E:\Backups"
+          [ngModel]="folderPath()" (ngModelChange)="folderPath.set($event)" />
+      </label>
+      <button class="btn btn-primary" (click)="copyToFolder()" [disabled]="isCopying()">
+        {{ isCopying() ? 'Copying...' : '📁 Copy database' }}
+      </button>
+    </div>
+  </div>
+
+  <div class="card section">
+    <h3>Backups in the default folder</h3>
+    @if (backups(); as b) {
+      <p class="hint">Folder: <code>{{ b.defaultFolder }}</code> (the newest 10 backups are kept)</p>
+      @if (b.files.length === 0) {
+        <p class="hint">No backups here yet.</p>
+      } @else {
+        <div class="table-scroll">
+          <table class="data-table">
+            <thead><tr><th>File</th><th>Size</th><th>Created</th></tr></thead>
+            <tbody>
+              @for (f of b.files; track f.name) {
+                <tr>
+                  <td>{{ f.name }}</td>
+                  <td>{{ formatSize(f.sizeBytes) }}</td>
+                  <td>{{ f.createdAt | date:'medium' }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    }
+  </div>
+
+  <div class="card section danger-zone">
+    <h3>Restore from a backup</h3>
+    <div class="form-warning">
+      Restoring replaces <strong>all current data</strong> (products, customers, bills, users) with the contents of the backup file.
+      A safety copy of today's data is saved automatically first. Everyone will be signed out afterwards.
+    </div>
+
+    @if (restoreError()) { <div class="form-error">{{ restoreError() }}</div> }
+
+    <div class="file-row">
+      <input type="file" class="input" accept=".db" (change)="onRestoreFile($event)" />
+      <button class="btn btn-secondary" (click)="checkRestoreFile()" [disabled]="isChecking() || !restoreFile()">
+        {{ isChecking() ? 'Checking...' : 'Check file' }}
+      </button>
+    </div>
+
+    @if (restoreInfo(); as info) {
+      <div class="info-box">
+        <div>This backup contains:</div>
+        <ul>
+          <li>{{ info.products }} products</li>
+          <li>{{ info.customers }} customers</li>
+          <li>{{ info.bills }} bills @if (info.newestBillDate) { (newest: {{ shortDate(info.newestBillDate) }}) }</li>
+          <li>{{ info.users }} user accounts</li>
+        </ul>
+      </div>
+
+      <label class="field">
+        <span>Type RESTORE to confirm</span>
+        <input class="input" autocomplete="off" [ngModel]="confirmText()" (ngModelChange)="confirmText.set($event)" />
+      </label>
+
+      <button class="btn btn-danger" (click)="restore()" [disabled]="!canRestore()">
+        {{ isRestoring() ? 'Restoring...' : 'Restore now' }}
+      </button>
+    }
+  </div>
+</div>

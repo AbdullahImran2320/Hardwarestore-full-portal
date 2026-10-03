@@ -1,0 +1,54 @@
+<div class="page">
+  <div class="page-header">
+    <div>
+      <h1>My Account</h1>
+      <p class="page-sub">
+        Signed in as <strong>{{ authService.currentUser()?.username }}</strong>
+        <span class="pill" [class.pill-admin]="authService.isAdmin()">{{ authService.currentUser()?.role }}</span>
+      </p>
+    </div>
+  </div>
+
+  <div class="card account-card">
+    <h3>Change password</h3>
+
+    @if (mustChange()) {
+      <div class="form-warning">
+        You are using a temporary or default password. Choose a new one to continue.
+      </div>
+    }
+
+    @if (errorMsg()) { <div class="form-error">{{ errorMsg() }}</div> }
+    @if (successMsg()) { <div class="form-success">{{ successMsg() }}</div> }
+
+    <label class="field">
+      <span>Current password</span>
+      <input class="input" [type]="showPasswords() ? 'text' : 'password'" autocomplete="current-password"
+        [ngModel]="currentPassword()" (ngModelChange)="currentPassword.set($event)" />
+    </label>
+
+    <label class="field">
+      <span>New password (8+ characters, with a letter and a number)</span>
+      <input class="input" [type]="showPasswords() ? 'text' : 'password'" autocomplete="new-password"
+        [ngModel]="newPassword()" (ngModelChange)="newPassword.set($event)" />
+    </label>
+
+    <label class="field">
+      <span>Confirm new password</span>
+      <input class="input" [type]="showPasswords() ? 'text' : 'password'" autocomplete="new-password"
+        [ngModel]="confirmPassword()" (ngModelChange)="confirmPassword.set($event)"
+        (keyup.enter)="submit()" />
+    </label>
+
+    <label class="show-row">
+      <input type="checkbox" [checked]="showPasswords()" (change)="showPasswords.set(!showPasswords())" />
+      Show passwords
+    </label>
+
+    <div class="modal-actions">
+      <button class="btn btn-primary" (click)="submit()" [disabled]="isSaving() || !!successMsg()">
+        {{ isSaving() ? 'Saving...' : 'Change password' }}
+      </button>
+    </div>
+  </div>
+</div>

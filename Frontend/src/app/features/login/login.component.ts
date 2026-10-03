@@ -3,11 +3,12 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
+import { ThemeToggleComponent } from '../../shared/components/theme-toggle/theme-toggle.component';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, ThemeToggleComponent],
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss'
 })
@@ -28,7 +29,7 @@ export class LoginComponent {
     this.errorMsg.set(null);
 
     this.authService.login(this.username(), this.password()).subscribe({
-      next: () => { this.isLoading.set(false); this.router.navigate(['/dashboard']); },
+      next: res => { this.isLoading.set(false); this.router.navigate([res.mustChangePassword ? '/account' : '/dashboard']); },
       error: () => { this.isLoading.set(false); this.errorMsg.set('Invalid username or password.'); }
     });
   }

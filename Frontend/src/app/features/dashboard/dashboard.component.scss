@@ -100,7 +100,7 @@
 }
 .skeleton-card {
   height: 90px;
-  background: linear-gradient(90deg, var(--color-surface-alt) 25%, #e8e3db 50%, var(--color-surface-alt) 75%);
+  background: linear-gradient(90deg, var(--color-surface-alt) 25%, var(--color-skeleton) 50%, var(--color-surface-alt) 75%);
   background-size: 200% 100%;
   animation: shimmer 1.4s infinite;
 }

@@ -8,6 +8,7 @@
     </button>
     <span class="mobile-title">🔧 Hardware Store</span>
     <span class="mobile-spacer"></span>
+    <app-theme-toggle />
   </header>
 
   <!-- Sidebar -->
@@ -32,17 +33,35 @@
           {{ item.label }}
       </a>
       }
+
+      @if (authService.isAdmin()) {
+        <div class="nav-section">Admin</div>
+        @for (item of adminItems; track item.path) {
+          <a
+            [routerLink]="item.path"
+            routerLinkActive="active"
+            class="nav-link"
+            (click)="closeMobileNav()">
+
+            <span class="nav-dot"></span>
+            {{ item.label }}
+          </a>
+        }
+      }
     </nav>
 
     <div class="sidebar-footer">
       <div class="user-chip">
-  <div class="avatar">{{ authService.currentUser()?.username?.charAt(0)?.toUpperCase() }}</div>
-  <div>
-    <div class="user-name">{{ authService.currentUser()?.username }}</div>
-    <div class="user-role">{{ authService.currentUser()?.role }}</div>
-  </div>
-  <button class="logout-btn" (click)="logout()" title="Logout">⏻</button>
-</div>
+        <a routerLink="/account" class="user-link" title="My account" (click)="closeMobileNav()">
+          <div class="avatar">{{ authService.currentUser()?.username?.charAt(0)?.toUpperCase() }}</div>
+          <div>
+            <div class="user-name">{{ authService.currentUser()?.username }}</div>
+            <div class="user-role">{{ authService.currentUser()?.role }} · Account</div>
+          </div>
+        </a>
+        <app-theme-toggle />
+        <button class="logout-btn" (click)="logout()" title="Logout">⏻</button>
+      </div>
     </div>
   </aside>
 

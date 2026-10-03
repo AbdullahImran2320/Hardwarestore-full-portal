@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -20,26 +20,42 @@ namespace HardwareStorePortal.API.Services
             _config = config;
         }
 
-        public async Task<AuthResponseDTO> RegisterAsync(RegisterDTO dto)
+        // Admin-only (see AuthController). Does NOT log the new user in.
+        public async Task<UserSummaryDTO> RegisterAsync(RegisterDTO dto)
         {
-            if (await _context.Users.AnyAsync(u => u.Username == dto.Username))
+            var username = dto.Username?.Trim() ?? string.Empty;
+
+            if (username.Length < 3 || username.Length > 30)
+                throw new InvalidOperationException("Username must be 3 to 30 characters.");
+
+            if (dto.Role != "Admin" && dto.Role != "Staff")
+                throw new InvalidOperationException("Role must be Admin or Staff.");
+
+            var passwordError = PasswordRules.Validate(dto.Password);
+            if (passwordError != null)
+                throw new InvalidOperationException(passwordError);
+
+            var lowered = username.ToLower();
+            if (await _context.Users.AnyAsync(u => u.Username.ToLower() == lowered))
                 throw new InvalidOperationException("Username already taken.");
 
             var user = new User
             {
-                Username = dto.Username,
+                Username = username,
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password),
-                Role = dto.Role
+                Role = dto.Role,
+                MustChangePassword = true // the admin knows the first password, so the user picks their own
             };
 
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
 
-            return new AuthResponseDTO
+            return new UserSummaryDTO
             {
-                Token = GenerateToken(user),
+                Id = user.Id,
                 Username = user.Username,
-                Role = user.Role
+                Role = user.Role,
+                MustChangePassword = user.MustChangePassword
             };
         }
 
@@ -53,8 +69,33 @@ namespace HardwareStorePortal.API.Services
             {
                 Token = GenerateToken(user),
                 Username = user.Username,
-                Role = user.Role
+                Role = user.Role,
+                MustChangePassword = user.MustChangePassword
             };
+        }
+
+        public async Task ChangePasswordAsync(int userId, ChangePasswordDTO dto)
+        {
+            var user = await _context.Users.FindAsync(userId);
+            if (user == null)
+                throw new InvalidOperationException("User not found.");
+
+            if (!BCrypt.Net.BCrypt.Verify(dto.CurrentPassword, user.PasswordHash))
+                throw new InvalidOperationException("Current password is incorrect.");
+
+            if (dto.NewPassword != dto.ConfirmPassword)
+                throw new InvalidOperationException("New password and confirmation do not match.");
+
+            if (dto.NewPassword == dto.CurrentPassword)
+                throw new InvalidOperationException("New password must be different from the current one.");
+
+            var passwordError = PasswordRules.Validate(dto.NewPassword);
+            if (passwordError != null)
+                throw new InvalidOperationException(passwordError);
+
+            user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.NewPassword);
+            user.MustChangePassword = false;
+            await _context.SaveChangesAsync();
         }
 
         private string GenerateToken(User user)

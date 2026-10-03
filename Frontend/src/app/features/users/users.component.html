@@ -1,0 +1,98 @@
+<div class="page">
+  <div class="page-header">
+    <div>
+      <h1>Users</h1>
+      <p class="page-sub">{{ users().length }} accounts · only Admins can see this page</p>
+    </div>
+    <button class="btn btn-primary" (click)="openAdd()">+ Add User</button>
+  </div>
+
+  @if (notice()) { <div class="form-success">{{ notice() }}</div> }
+  @if (errorMsg()) { <div class="form-error">{{ errorMsg() }}</div> }
+
+  @if (isLoading()) {
+    <div class="card">Loading...</div>
+  } @else {
+    <div class="card table-card">
+      <table class="data-table">
+        <thead>
+          <tr><th>Username</th><th>Role</th><th>Status</th><th></th></tr>
+        </thead>
+        <tbody>
+          @for (u of users(); track u.id) {
+            <tr>
+              <td class="strong">{{ u.username }} @if (isMe(u)) { <span class="you">(you)</span> }</td>
+              <td><span class="pill" [class.pill-admin]="u.role === 'Admin'">{{ u.role }}</span></td>
+              <td>
+                @if (u.mustChangePassword) {
+                  <span class="badge badge-warning">Must change password</span>
+                } @else {
+                  <span class="badge badge-success">Active</span>
+                }
+              </td>
+              <td class="actions">
+                <button class="btn btn-secondary small" (click)="openReset(u)">Reset password</button>
+                @if (!isMe(u)) {
+                  <button class="btn btn-secondary small danger" (click)="remove(u)">Delete</button>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>
+
+@if (isAddOpen()) {
+  <div class="modal-backdrop" (click)="closeAdd()">
+    <div class="card modal" (click)="$event.stopPropagation()">
+      <h3>Add user</h3>
+      @if (formError()) { <div class="form-error">{{ formError() }}</div> }
+
+      <label class="field">
+        <span>Username</span>
+        <input class="input" autocomplete="off" [ngModel]="newUsername()" (ngModelChange)="newUsername.set($event)" />
+      </label>
+      <label class="field">
+        <span>Temporary password (8+ characters, a letter and a number)</span>
+        <input class="input" type="text" autocomplete="off" [ngModel]="newPassword()" (ngModelChange)="newPassword.set($event)" />
+      </label>
+      <label class="field">
+        <span>Role</span>
+        <select class="input" [ngModel]="newRole()" (ngModelChange)="newRole.set($event)">
+          <option value="Staff">Staff</option>
+          <option value="Admin">Admin</option>
+        </select>
+      </label>
+
+      <div class="modal-actions">
+        <button class="btn btn-secondary" (click)="closeAdd()">Cancel</button>
+        <button class="btn btn-primary" (click)="saveNew()" [disabled]="isSaving()">
+          {{ isSaving() ? 'Saving...' : 'Create user' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+@if (resetTarget(); as target) {
+  <div class="modal-backdrop" (click)="closeReset()">
+    <div class="card modal" (click)="$event.stopPropagation()">
+      <h3>Reset password for {{ target.username }}</h3>
+      @if (formError()) { <div class="form-error">{{ formError() }}</div> }
+
+      <label class="field">
+        <span>New temporary password</span>
+        <input class="input" type="text" autocomplete="off" [ngModel]="resetPassword()" (ngModelChange)="resetPassword.set($event)" />
+      </label>
+
+      <div class="modal-actions">
+        <button class="btn btn-secondary" (click)="closeReset()">Cancel</button>
+        <button class="btn btn-primary" (click)="saveReset()" [disabled]="isSaving()">
+          {{ isSaving() ? 'Saving...' : 'Reset password' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}

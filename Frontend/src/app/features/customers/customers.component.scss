@@ -33,8 +33,8 @@
 .form-grid-single { display: flex; flex-direction: column; gap: var(--space-md); margin: var(--space-md) 0; }
 .field { display: flex; flex-direction: column; gap: 0.3rem; span { font-size: 0.8rem; font-weight: 600; color: var(--color-text-muted); } }
 .modal-actions { display: flex; justify-content: flex-end; gap: var(--space-sm); margin-top: var(--space-md); }
-.form-error { background: #fce8e8; color: var(--color-danger); padding: var(--space-sm); border-radius: var(--radius-sm); font-size: 0.85rem; margin-bottom: var(--space-sm); }
+.form-error { background: var(--color-danger-bg); color: var(--color-danger); padding: var(--space-sm); border-radius: var(--radius-sm); font-size: 0.85rem; margin-bottom: var(--space-sm); }
 
-.skeleton-block { height: 200px; background: linear-gradient(90deg, var(--color-surface-alt) 25%, #e8e3db 50%, var(--color-surface-alt) 75%); background-size: 200% 100%; animation: shimmer 1.4s infinite; }
+.skeleton-block { height: 200px; background: linear-gradient(90deg, var(--color-surface-alt) 25%, var(--color-skeleton) 50%, var(--color-surface-alt) 75%); background-size: 200% 100%; animation: shimmer 1.4s infinite; }
 .empty-state-block { text-align: center; padding: var(--space-xl); color: var(--color-text-muted); }
 .error-card { text-align: center; color: var(--color-danger); p { margin-bottom: var(--space-md); } }

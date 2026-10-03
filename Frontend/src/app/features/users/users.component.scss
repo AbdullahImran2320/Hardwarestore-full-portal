@@ -1,0 +1,6 @@
+.table-card { padding: 0; overflow: auto; }
+.strong { font-weight: 600; }
+.you { color: var(--color-text-muted); font-weight: 400; font-size: 0.8rem; }
+.actions { display: flex; gap: var(--space-sm); justify-content: flex-end; flex-wrap: wrap; }
+.small { padding: 0.35rem 0.7rem; font-size: 0.8rem; }
+.danger:hover { background: var(--color-danger-bg); color: var(--color-danger); }

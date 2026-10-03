@@ -1,0 +1,17 @@
+namespace HardwareStorePortal.API.Services
+{
+    public static class PasswordRules
+    {
+        // Returns an error message, or null when the password is acceptable.
+        public static string? Validate(string? password)
+        {
+            if (string.IsNullOrEmpty(password) || password.Length < 8)
+                return "Password must be at least 8 characters.";
+
+            if (!password.Any(char.IsLetter) || !password.Any(char.IsDigit))
+                return "Password must contain at least one letter and one number.";
+
+            return null;
+        }
+    }
+}

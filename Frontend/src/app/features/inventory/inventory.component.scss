@@ -69,8 +69,8 @@
   transition: all 0.12s ease;
 
   &:hover { background: var(--color-surface-alt); border-color: var(--color-text-muted); }
-  &.danger:hover { background: #fce8e8; border-color: var(--color-danger); color: var(--color-danger); }
-  &.admin:hover { background: #e6f7e9; border-color: var(--color-success); }
+  &.danger:hover { background: var(--color-danger-bg); border-color: var(--color-danger); color: var(--color-danger); }
+  &.admin:hover { background: var(--color-success-bg); border-color: var(--color-success); }
 }
 .product-name { font-weight: 600; }
 
@@ -83,7 +83,7 @@
   cursor: pointer;
   font-size: 0.85rem;
   &:hover { background: var(--color-border); }
-  &.danger:hover { background: #fce8e8; }
+  &.danger:hover { background: var(--color-danger-bg); }
 }
 
 .mobile-cards { display: none; flex-direction: column; gap: var(--space-sm); }
@@ -143,15 +143,15 @@
   transition: all 0.12s ease;
 
   &:hover { background: var(--color-surface-alt); border-color: var(--color-text-muted); }
-  &.danger:hover { background: #fce8e8; border-color: var(--color-danger); color: var(--color-danger); }
-  &.admin:hover { background: #e6f7e9; border-color: var(--color-success); }
+  &.danger:hover { background: var(--color-danger-bg); border-color: var(--color-danger); color: var(--color-danger); }
+  &.admin:hover { background: var(--color-success-bg); border-color: var(--color-success); }
 }
   .mobile-cards { display: flex; }
 }
 
 .skeleton-block {
   height: 300px;
-  background: linear-gradient(90deg, var(--color-surface-alt) 25%, #e8e3db 50%, var(--color-surface-alt) 75%);
+  background: linear-gradient(90deg, var(--color-surface-alt) 25%, var(--color-skeleton) 50%, var(--color-surface-alt) 75%);
   background-size: 200% 100%;
   animation: shimmer 1.4s infinite;
 }
@@ -161,7 +161,7 @@
 // Modal
 .modal-backdrop {
   position: fixed; inset: 0;
-  background: rgba(43,38,34,0.5);
+  background: var(--color-overlay);
   display: flex; align-items: center; justify-content: center;
   z-index: 50;
   padding: var(--space-md);
@@ -197,7 +197,7 @@
   margin-top: var(--space-md);
 }
 .form-error {
-  background: #fce8e8;
+  background: var(--color-danger-bg);
   color: var(--color-danger);
   padding: var(--space-sm);
   border-radius: var(--radius-sm);
@@ -217,7 +217,7 @@
  { color: var(--color-text-muted); font-size: 0.85rem; margin-top: -0.5rem; }
 .category-modal {
   border: 1px solid var(--color-danger);
-  background: #fdf2f2;
+  background: var(--color-danger-bg);
 
   h3 {
     color: var(--color-danger);
@@ -242,6 +242,6 @@
   justify-content: space-between;
   align-items: center;
   padding: 0.5rem 0.75rem;
-  border: 1px solid #eee;
+  border: 1px solid var(--color-border);
   border-radius: 6px;
 }

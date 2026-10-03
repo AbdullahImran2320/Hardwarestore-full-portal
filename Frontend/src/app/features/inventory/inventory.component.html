@@ -4,7 +4,11 @@
       <h1>Inventory</h1>
       <p class="page-sub">{{ filteredProducts().length }} of {{ products().length }} products</p>
     </div>
-    <div style="display:flex; gap:0.75rem;">
+    <div style="display:flex; gap:0.75rem; flex-wrap:wrap;">
+      <app-export-button [kind]="'products'" />
+      @if (authService.isAdmin()) {
+        <button class="btn btn-secondary" (click)="showImport.set(true)">⬆ Import Excel</button>
+      }
       <button class="btn btn-secondary" (click)="openAddCategoryModal()">+ Add Category</button>
       <button class="btn btn-primary" (click)="openAddModal()">+ Add Product</button>
     </div>
@@ -287,4 +291,8 @@
       </div>
     </div>
   </div>
+}
+
+@if (showImport()) {
+  <app-import-dialog [kind]="'products'" (closed)="showImport.set(false)" (imported)="onImported()" />
 }

@@ -7,7 +7,13 @@
         <span class="danger-text">Rs. {{ totalOutstandingAcrossAll() | number:'1.0-0' }} total outstanding</span>
       </p>
     </div>
-    <button class="btn btn-primary" (click)="openAddModal()">+ Add Customer</button>
+    <div class="header-actions">
+      <app-export-button [kind]="'customers'" />
+      @if (authService.isAdmin()) {
+        <button class="btn btn-secondary" (click)="showImport.set(true)">⬆ Import Excel</button>
+      }
+      <button class="btn btn-primary" (click)="openAddModal()">+ Add Customer</button>
+    </div>
   </div>
 
   <div class="filter-bar card">
@@ -75,4 +81,8 @@
       </div>
     </div>
   </div>
+}
+
+@if (showImport()) {
+  <app-import-dialog [kind]="'customers'" (closed)="showImport.set(false)" (imported)="onImported()" />
 }

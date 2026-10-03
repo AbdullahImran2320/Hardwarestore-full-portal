@@ -42,3 +42,8 @@ Thumbs.db
 ## ---------- Sensitive local files ----------
 **/Credentials.png
 **/*secrets*
+
+*.zip
+*.db
+*.db-shm
+*.db-wal

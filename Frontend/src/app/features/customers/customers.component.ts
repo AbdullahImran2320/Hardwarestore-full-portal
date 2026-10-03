@@ -1,4 +1,4 @@
-import { Component, OnInit, signal, computed } from '@angular/core';
+import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
@@ -7,15 +7,22 @@ import { CustomerService } from '../../core/services/customer.service';
 import { BillService } from '../../core/services/bill.service';
 import { CustomerWithBalance } from '../../core/models/customer.model';
 import { CreateCustomer } from '../../core/models/customer.model';
+import { ExportButtonComponent } from '../../shared/components/export-button/export-button.component';
+import { ImportDialogComponent } from '../../shared/components/import-dialog/import-dialog.component';
+import { AuthService } from '../../core/services/auth.service';
 
 @Component({
   selector: 'app-customers',
   standalone: true,
-  imports: [CommonModule, FormsModule,RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink, ExportButtonComponent, ImportDialogComponent],
   templateUrl: './customers.component.html',
   styleUrl: './customers.component.scss'
 })
 export class CustomersComponent implements OnInit {
+  authService = inject(AuthService);
+  showImport = signal(false);
+  onImported() { this.loadCustomers(); }
+
   customers = signal<CustomerWithBalance[]>([]);
   isLoading = signal(true);
   errorMsg = signal<string | null>(null);

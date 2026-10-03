@@ -7,16 +7,21 @@ import { Product, CreateProduct, UpdateProduct, AdjustStock } from '../../core/m
 import { Category } from '../../core/models/category.model'; // NEW
 import { AuthService } from '../../core/services/auth.service'; // adjust path
 import { ProductCost } from '../../core/models/product.model'; // adjust relative path if needed
+import { ExportButtonComponent } from '../../shared/components/export-button/export-button.component';
+import { ImportDialogComponent } from '../../shared/components/import-dialog/import-dialog.component';
 
 
 @Component({
   selector: 'app-inventory',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, ExportButtonComponent, ImportDialogComponent],
   templateUrl: './inventory.component.html',
   styleUrl: './inventory.component.scss'
 })
 export class InventoryComponent implements OnInit {
+  showImport = signal(false);
+  onImported() { this.loadProducts(); }
+
  authService = inject(AuthService);
 
   products = signal<Product[]>([]);
