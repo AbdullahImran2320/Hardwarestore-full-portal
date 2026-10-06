@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using HardwareStorePortal.API.DTOs;
 using HardwareStorePortal.API.Services;
@@ -61,6 +61,7 @@ namespace HardwareStorePortal.API.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(int id)
         {
             var success = await _service.DeleteBillAsync(id);

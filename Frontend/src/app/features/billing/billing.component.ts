@@ -151,6 +151,14 @@ updateQuantity(item: CartItem, newQty: number) {
       this.submitError.set('Paid amount cannot be negative.');
       return;
     }
+    if (this.paidAmount() > this.subtotal()) {
+      this.submitError.set('Paid amount cannot exceed the bill total.');
+      return;
+    }
+    if (!this.selectedCustomerId() && this.paidAmount() < this.subtotal()) {
+      this.submitError.set('Walk-in sales must be paid in full. Select a customer to allow credit/partial payment.');
+      return;
+    }
 
   const dto: CreateBill = {
   customerId: this.selectedCustomerId(),

@@ -1,4 +1,4 @@
-﻿using HardwareStorePortal.API.DTOs;
+using HardwareStorePortal.API.DTOs;
 using HardwareStorePortal.API.Models;
 using HardwareStorePortal.API.Repositories;
 
@@ -33,6 +33,9 @@ namespace HardwareStorePortal.API.Services
             var method = string.IsNullOrWhiteSpace(dto.PaymentMethod) ? "Cash" : dto.PaymentMethod.Trim();
             if (method != "Cash" && method != "Online")
                 throw new InvalidOperationException("Payment method must be 'Cash' or 'Online'.");
+
+            if (dto.PaidAmount < 0)
+                throw new InvalidOperationException("Paid amount cannot be negative.");
 
             var bill = new Bill
             {
@@ -89,10 +92,32 @@ namespace HardwareStorePortal.API.Services
                 });
             }
 
+            if (dto.PaidAmount > total)
+                throw new InvalidOperationException(
+                    $"Paid amount (Rs. {dto.PaidAmount}) cannot exceed the bill total (Rs. {total}).");
+
+            // Walk-in customers (no CustomerId) must pay in full — credit sales require a named customer
+            if (dto.CustomerId == null && dto.PaidAmount < total)
+                throw new InvalidOperationException(
+                    "Walk-in sales must be paid in full. Select a customer to allow a credit/partial payment.");
+
             bill.TotalAmount = total;
             bill.Status = DetermineStatus(total, dto.PaidAmount);
 
-            var created = await _billRepository.CreateBillWithItemsAsync(bill, stockTransactions, productsToUpdate);
+            // Record the initial payment if any amount was paid
+            Payment? initialPayment = null;
+            if (dto.PaidAmount > 0)
+            {
+                initialPayment = new Payment
+                {
+                    Amount = dto.PaidAmount,
+                    PaymentMethod = method,
+                    PaymentDate = DateTime.UtcNow,
+                    Note = "Initial payment on sale"
+                };
+            }
+
+            var created = await _billRepository.CreateBillWithItemsAsync(bill, stockTransactions, productsToUpdate, initialPayment);
 
             // Re-fetch with includes so the returned DTO has full product/customer info
             var full = await _billRepository.GetByIdAsync(created.Id);

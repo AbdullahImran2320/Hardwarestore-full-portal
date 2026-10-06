@@ -1,4 +1,4 @@
-﻿using HardwareStorePortal.API.DTOs;
+using HardwareStorePortal.API.DTOs;
 using HardwareStorePortal.API.Models;
 using HardwareStorePortal.API.Repositories;
 
@@ -50,7 +50,10 @@ namespace HardwareStorePortal.API.Services
             product.Name = dto.Name;
             product.CategoryId = dto.CategoryId;
             product.Unit = dto.Unit;
-            product.PurchasePrice = dto.PurchasePrice;
+            if (dto.PurchasePrice.HasValue)
+            {
+                product.PurchasePrice = dto.PurchasePrice.Value;
+            }
             product.SalePrice = dto.SalePrice;
             product.ReorderLevel = dto.ReorderLevel;
 

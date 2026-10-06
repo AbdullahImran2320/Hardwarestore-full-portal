@@ -62,8 +62,9 @@ namespace HardwareStorePortal.API.Controllers
         [HttpPost("restore/validate")]
         [RequestSizeLimit(MaxUploadBytes)]
         [RequestFormLimits(MultipartBodyLengthLimit = MaxUploadBytes)]
-        public async Task<IActionResult> ValidateRestore([FromForm] IFormFile? file)
+        public async Task<IActionResult> ValidateRestore([FromForm] UploadFileForm form)
         {
+            var file = form.File;
             if (file == null || file.Length == 0)
                 return BadRequest(new { message = "Choose a backup (.db) file first." });
 
@@ -85,12 +86,13 @@ namespace HardwareStorePortal.API.Controllers
         [HttpPost("restore")]
         [RequestSizeLimit(MaxUploadBytes)]
         [RequestFormLimits(MultipartBodyLengthLimit = MaxUploadBytes)]
-        public async Task<IActionResult> Restore([FromForm] IFormFile? file, [FromForm] string? confirm)
+        public async Task<IActionResult> Restore([FromForm] RestoreForm form)
         {
+            var file = form.File;
             if (file == null || file.Length == 0)
                 return BadRequest(new { message = "Choose a backup (.db) file first." });
 
-            if (confirm != "RESTORE")
+            if (form.Confirm != "RESTORE")
                 return BadRequest(new { message = "Type RESTORE to confirm." });
 
             var temp = await SaveUploadAsync(file);

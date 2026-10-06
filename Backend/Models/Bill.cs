@@ -1,4 +1,4 @@
-﻿namespace HardwareStorePortal.API.Models
+namespace HardwareStorePortal.API.Models
 {
     public class Bill
     {
@@ -12,5 +12,6 @@
         public string PaymentMethod { get; set; } = "Cash"; // Cash / Online
 
         public List<BillItem> BillItems { get; set; } = new();
+        public List<Payment> Payments { get; set; } = new();
     }
 }

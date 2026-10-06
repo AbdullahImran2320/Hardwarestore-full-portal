@@ -23,7 +23,7 @@ export interface UpdateProduct {
   name: string;
   categoryId: number;
   unit: string;
-  purchasePrice: number;
+  purchasePrice?: number;
   salePrice: number;
   reorderLevel: number;
 }

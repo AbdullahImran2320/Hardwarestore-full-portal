@@ -5,7 +5,7 @@ title Hardware Store Portal - Build
 set "ROOT=%~dp0"
 if "%ROOT:~-1%"=="\" set "ROOT=%ROOT:~0,-1%"
 
-set "FRONTEND=%ROOT%\Frontend\hardware-store-frontend"
+set "FRONTEND=%ROOT%\Frontend"
 set "BACKEND_DIR=%ROOT%\Backend"
 
 echo.

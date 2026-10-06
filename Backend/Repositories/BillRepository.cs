@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using HardwareStorePortal.API.Data;
 using HardwareStorePortal.API.Models;
@@ -41,13 +41,20 @@ namespace HardwareStorePortal.API.Repositories
         public async Task<Bill> CreateBillWithItemsAsync(
             Bill bill,
             List<StockTransaction> stockTransactions,
-            List<Product> productsToUpdate)
+            List<Product> productsToUpdate,
+            Payment? initialPayment = null)
         {
             using IDbContextTransaction transaction = await _context.Database.BeginTransactionAsync();
             try
             {
                 _context.Bills.Add(bill);
                 await _context.SaveChangesAsync(); // generates Bill.Id and BillItem rows
+
+                if (initialPayment != null)
+                {
+                    initialPayment.BillId = bill.Id;
+                    _context.Payments.Add(initialPayment);
+                }
 
                 foreach (var st in stockTransactions)
                 {

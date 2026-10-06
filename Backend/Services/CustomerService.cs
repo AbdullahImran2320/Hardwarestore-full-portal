@@ -1,4 +1,4 @@
-﻿using HardwareStorePortal.API.DTOs;
+using HardwareStorePortal.API.DTOs;
 using HardwareStorePortal.API.Models;
 using HardwareStorePortal.API.Repositories;
 
@@ -17,6 +17,20 @@ namespace HardwareStorePortal.API.Services
         {
             var customers = await _repository.GetAllAsync();
             return customers.Select(MapToDTO).ToList();
+        }
+
+        public async Task<List<CustomerWithBalanceDTO>> GetWithBalancesAsync()
+        {
+            var rows = await _repository.GetAllWithBalancesAsync();
+            return rows.Select(r => new CustomerWithBalanceDTO
+            {
+                Id = r.Customer.Id,
+                Name = r.Customer.Name,
+                Phone = r.Customer.Phone,
+                Address = r.Customer.Address,
+                TotalOutstanding = r.TotalOutstanding,
+                BillCount = r.BillCount
+            }).ToList();
         }
 
         public async Task<CustomerDTO?> GetCustomerByIdAsync(int id)
@@ -52,6 +66,7 @@ namespace HardwareStorePortal.API.Services
 
         public async Task<bool> DeleteCustomerAsync(int id)
         {
+            // Repository throws InvalidOperationException if outstanding balance > 0
             return await _repository.DeleteAsync(id);
         }
 

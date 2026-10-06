@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using HardwareStorePortal.API.DTOs;
 using HardwareStorePortal.API.Services;
@@ -21,6 +21,13 @@ namespace HardwareStorePortal.API.Controllers
         public async Task<IActionResult> GetAll()
         {
             var customers = await _service.GetAllCustomersAsync();
+            return Ok(customers);
+        }
+
+        [HttpGet("with-balances")]
+        public async Task<IActionResult> GetWithBalances()
+        {
+            var customers = await _service.GetWithBalancesAsync();
             return Ok(customers);
         }
 
@@ -48,11 +55,19 @@ namespace HardwareStorePortal.API.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(int id)
         {
-            var success = await _service.DeleteCustomerAsync(id);
-            if (!success) return NotFound();
-            return NoContent();
+            try
+            {
+                var success = await _service.DeleteCustomerAsync(id);
+                if (!success) return NotFound();
+                return NoContent();
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
     }
 }

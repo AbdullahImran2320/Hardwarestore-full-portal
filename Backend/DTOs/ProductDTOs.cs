@@ -1,4 +1,4 @@
-﻿namespace HardwareStorePortal.API.DTOs
+namespace HardwareStorePortal.API.DTOs
 {
     // For returning product data
     public class ProductDTO
@@ -31,7 +31,7 @@
         public string Name { get; set; } = string.Empty;
         public int CategoryId { get; set; }
         public string Unit { get; set; } = string.Empty;
-        public decimal PurchasePrice { get; set; }
+        public decimal? PurchasePrice { get; set; }
         public decimal SalePrice { get; set; }
         public int ReorderLevel { get; set; }
     }

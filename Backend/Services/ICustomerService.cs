@@ -1,10 +1,11 @@
-﻿using HardwareStorePortal.API.DTOs;
+using HardwareStorePortal.API.DTOs;
 
 namespace HardwareStorePortal.API.Services
 {
     public interface ICustomerService
     {
         Task<List<CustomerDTO>> GetAllCustomersAsync();
+        Task<List<CustomerWithBalanceDTO>> GetWithBalancesAsync();
         Task<CustomerDTO?> GetCustomerByIdAsync(int id);
         Task<CustomerDTO> CreateCustomerAsync(CreateCustomerDTO dto);
         Task<bool> UpdateCustomerAsync(int id, UpdateCustomerDTO dto);

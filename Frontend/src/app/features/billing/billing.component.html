@@ -105,14 +105,13 @@
           <div class="totals-row">
             <span>Subtotal</span>
             <span>Rs. {{ subtotal() | number:'1.0-0' }}</span>
-            <span>Rs. {{ subtotal() + totalDiscount() | number:'1.0-0' }}</span>
-            @if (totalDiscount() > 0) {
-                <div class="totals-row discount-row">
-                  <span>Total Discount</span>
-                  <span>− Rs. {{ totalDiscount() | number:'1.0-0' }}</span>
-                </div>
-              }
           </div>
+          @if (totalDiscount() > 0) {
+            <div class="totals-row discount-row">
+              <span>Total Discount</span>
+              <span>− Rs. {{ totalDiscount() | number:'1.0-0' }}</span>
+            </div>
+          }
           <div class="totals-row net-row">
             <span>Net Total</span>
             <span>Rs. {{ subtotal() | number:'1.0-0' }}</span>

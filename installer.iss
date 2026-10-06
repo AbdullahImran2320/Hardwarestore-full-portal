@@ -5,7 +5,7 @@
 #endif
 
 #define AppName "Hardware Store Portal"
-#define AppVersion "1.0.0"
+#define AppVersion "1.1.0"
 
 [Setup]
 AppId={{B8C1E8C4-7F0C-4B55-9D13-8F7A4C6A3E21}
@@ -24,6 +24,12 @@ PrivilegesRequired=admin
 UninstallDisplayIcon={app}\{#APIEXE}
 CloseApplications=yes
 RestartApplications=no
+
+[Dirs]
+; The database, its backups and the login key live in ProgramData, outside {app}, so they survive
+; upgrades and uninstalls. Every Windows user of this PC must be able to write there.
+Name: "{commonappdata}\HardwareStorePortal"; Permissions: users-modify; Flags: uninsneveruninstall
+Name: "{commonappdata}\HardwareStorePortal\Backups"; Permissions: users-modify; Flags: uninsneveruninstall
 
 [Files]
 Source: "setup\Build\Backend\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs; Excludes: "*.db,*.db-shm,*.db-wal"

@@ -2,9 +2,7 @@ import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { forkJoin } from 'rxjs';
 import { CustomerService } from '../../core/services/customer.service';
-import { BillService } from '../../core/services/bill.service';
 import { CustomerWithBalance } from '../../core/models/customer.model';
 import { CreateCustomer } from '../../core/models/customer.model';
 import { ExportButtonComponent } from '../../shared/components/export-button/export-button.component';
@@ -45,10 +43,7 @@ export class CustomersComponent implements OnInit {
     this.customers().reduce((sum, c) => sum + c.totalOutstanding, 0)
   );
 
-  constructor(
-    private customerService: CustomerService,
-    private billService: BillService
-  ) {}
+  constructor(private customerService: CustomerService) {}
 
   ngOnInit() {
     this.loadCustomers();
@@ -58,28 +53,9 @@ export class CustomersComponent implements OnInit {
     this.isLoading.set(true);
     this.errorMsg.set(null);
 
-    this.customerService.getAll().subscribe({
-      next: (customers) => {
-        if (customers.length === 0) {
-          this.customers.set([]);
-          this.isLoading.set(false);
-          return;
-        }
-        // fetch each customer's bills in parallel to compute outstanding totals
-        const billCalls = customers.map(c => this.billService.getByCustomer(c.id));
-        forkJoin(billCalls).subscribe({
-          next: (billLists) => {
-            const withBalance: CustomerWithBalance[] = customers.map((c, i) => ({
-              ...c,
-              totalOutstanding: billLists[i].reduce((sum, b) => sum + b.outstandingAmount, 0),
-              billCount: billLists[i].length
-            }));
-            this.customers.set(withBalance);
-            this.isLoading.set(false);
-          },
-          error: () => { this.errorMsg.set('Could not load customer balances.'); this.isLoading.set(false); }
-        });
-      },
+    // Single request — server pre-computes balances, no N+1 forkJoin needed
+    this.customerService.getWithBalances().subscribe({
+      next: (data) => { this.customers.set(data); this.isLoading.set(false); },
       error: () => { this.errorMsg.set('Could not load customers. Is the API running?'); this.isLoading.set(false); }
     });
   }

@@ -18,6 +18,15 @@ Windows desktop installer.
 - **Role-based access** — `Admin` and `Staff` roles; cost/purchase price editing and category
   management are Admin-only
 - **Daily reports** — sales totals, collected amounts, outstanding amounts, bill counts
+- **Excel export** — products, customers and bills as `.xlsx` (purchase prices only for Admins)
+- **Excel import** (Admin) — products and customers, with a template, a preview of every row and
+  an all-or-nothing save
+- **Backup & restore** (Admin) — download the database, copy it to a folder or USB drive, and restore
+  from a backup file (a safety copy is taken first)
+- **User management** (Admin) — add users, reset passwords, delete users
+- **Change password** — every user can change their own password; accounts that still use a
+  default or admin-set password must change it at next login
+- **Light and dark theme** — toggle in the sidebar; the choice is remembered
 
 ## Tech stack
 
@@ -48,16 +57,16 @@ Hardware-store-portal/
 
 **Backend**
 ```bash
-cd Backend/HardwareStorePortal.API
+cd Backend
 dotnet run
 ```
 Swagger UI is available at `/swagger` once running.
 
 **Frontend**
 ```bash
-cd Frontend/hardware-store-frontend
+cd Frontend
 npm install
-ng serve
+npm start
 ```
 Then open `http://localhost:4200`.
 
@@ -68,15 +77,27 @@ wherever the backend is actually running.
 
 On first run, the backend automatically creates its database and seeds three accounts:
 
-| Username | Role  |
-|----------|-------|
-| admin    | Admin |
-| Muneeb   | Staff |
-| Shahid   | Staff |
+| Username | Role  | Default Password |
+|----------|-------|------------------|
+| admin    | Admin | Admin123!        |
+| Muneeb   | Admin | muneeb786        |
+| Shahid   | Staff | Shahid123!       |
 
-> These are demo/internal seed accounts for a locally-run installer. Change the passwords
-> (directly in the database, or via a future "change password" feature) before deploying to
-> a shared or production environment.
+> These passwords are public (they are in this repository), so any account that still uses one
+> is forced to choose a new password at its next login. Users created by an Admin must also
+> choose their own password at first login. Users can change their password any time from the
+> **My Account** page (click your name in the sidebar).
+
+## Data, backups and security
+
+- The database is stored outside the install folder, in
+  `%ProgramData%\HardwareStorePortal\hardwarestore.db`, so upgrading or uninstalling the app never
+  deletes your data.
+- Backups made from the **Backup & Restore** page go to `%ProgramData%\HardwareStorePortal\Backups`
+  by default (the newest 10 are kept), or to any folder you type, for example a USB drive.
+- Each installation creates its own random login-signing key on first run
+  (`%ProgramData%\HardwareStorePortal\jwt.key`). Nothing secret is needed in the repository.
+- Only an Admin can create users. Every API endpoint except login requires a signed-in user.
 
 ## Building the Windows installer
 

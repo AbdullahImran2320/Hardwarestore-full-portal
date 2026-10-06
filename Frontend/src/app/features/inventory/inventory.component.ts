@@ -179,7 +179,6 @@ deleteCategory(c: Category) {
         name: this.form.name,
         categoryId: this.form.categoryId, // CHANGED
         unit: this.form.unit,
-        purchasePrice: this.form.purchasePrice,
         salePrice: this.form.salePrice,
         reorderLevel: this.form.reorderLevel
       };

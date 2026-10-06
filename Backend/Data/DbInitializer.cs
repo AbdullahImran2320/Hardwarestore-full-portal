@@ -11,7 +11,7 @@ namespace HardwareStorePortal.API.Data
         {
             ("admin", "Admin", "Admin123!"),
             ("Muneeb", "Admin", "muneeb786"),
-            ("Shahid", "Staff", "sm786")
+            ("Shahid", "Staff", "Shahid123!")
         };
 
         public static void Initialize(AppDbContext db)

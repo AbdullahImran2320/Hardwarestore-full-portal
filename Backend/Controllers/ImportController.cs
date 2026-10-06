@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using HardwareStorePortal.API.Data;
+using HardwareStorePortal.API.DTOs;
 using HardwareStorePortal.API.Services;
 
 namespace HardwareStorePortal.API.Controllers
@@ -37,27 +38,27 @@ namespace HardwareStorePortal.API.Controllers
         }
 
         [HttpPost("products/preview")]
-        public async Task<IActionResult> PreviewProducts([FromForm] IFormFile? file)
+        public async Task<IActionResult> PreviewProducts([FromForm] UploadFileForm form)
         {
-            return await Run(file, stream => _import.PreviewProductsAsync(stream));
+            return await Run(form.File, stream => _import.PreviewProductsAsync(stream));
         }
 
         [HttpPost("products/commit")]
-        public async Task<IActionResult> CommitProducts([FromForm] IFormFile? file, [FromForm] bool skipInvalid = false)
+        public async Task<IActionResult> CommitProducts([FromForm] ImportCommitForm form)
         {
-            return await Run(file, stream => _import.CommitProductsAsync(stream, skipInvalid));
+            return await Run(form.File, stream => _import.CommitProductsAsync(stream, form.SkipInvalid));
         }
 
         [HttpPost("customers/preview")]
-        public async Task<IActionResult> PreviewCustomers([FromForm] IFormFile? file)
+        public async Task<IActionResult> PreviewCustomers([FromForm] UploadFileForm form)
         {
-            return await Run(file, stream => _import.PreviewCustomersAsync(stream));
+            return await Run(form.File, stream => _import.PreviewCustomersAsync(stream));
         }
 
         [HttpPost("customers/commit")]
-        public async Task<IActionResult> CommitCustomers([FromForm] IFormFile? file, [FromForm] bool skipInvalid = false)
+        public async Task<IActionResult> CommitCustomers([FromForm] ImportCommitForm form)
         {
-            return await Run(file, stream => _import.CommitCustomersAsync(stream, skipInvalid));
+            return await Run(form.File, stream => _import.CommitCustomersAsync(stream, form.SkipInvalid));
         }
 
         private async Task<IActionResult> Run<T>(IFormFile? file, Func<Stream, Task<T>> action)
